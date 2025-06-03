@@ -1,0 +1,195 @@
+6698 SAYILI KVK KANUNU BİLGİLENDİRME
+KİŞİSEL VERİLERİN KORUNMASI VE KULLANILMASINA İLİŞKİN AYDINLATMA METNİ
+(Son güncelleme: 24.01.2022)
+Değerli çalışanlarımız, ziyaretçilerimiz ve stajyerlerimiz güvenliğiniz göz önünde
+bulundurarak, başta özel hayatın gizliliği olmak üzere, temel hak ve özürlüklerin korunması
+amacıyla, kişisel verilerle ilgili düzenlenen "7 Nisan 2016 tarihli ve 29677 Sayılı Resmî
+Gazete’de yayımlanan 6698 sayılı Kişisel Verilerin Korunması Kanunu" hususunda sizi
+bilgilendirmek ve bu kapsamda “Veri Sorumlusunun Aydınlatma Yükümlülüğü” başlıklı 10.
+maddesi ile 10 Mart 2018 tarih ve 30356 sayılı Resmi Gazete ’de yayımlanan Aydınlatma
+Yükümlülüğünün Yerine Getirilmesinde Uyulacak Usul ve Esaslar Hakkında Tebliğ uyarınca
+işbu “Aydınlatma Yükümlülüğümüzü” yerine getirmek istiyoruz.
+Amacımız;
+Kişisel verilerin alınmasındaki hukuki nedenleri, alınma şekli, nasıl koruduğumuz,
+kişisel verileri işleme amaçları, uyum sağladığımız kurallar ve veri işleme süreçlerimiz
+hakkında en şeffaf şekilde bilgilendirmektir.
+Kuruma iletmiş olduğunuz her türlü kişisel veri bakımından, 7 Nisan 2016 tarihinde
+yürürlüğe giren 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVK Kanun”) gereğince; Veri
+Sorumlusu ve Veri İşleyen sıfatıyla, kişisel bilgileri; kanunda açıklandığı çerçevede ve aşağıda
+açıklanan şart ve sınırlara bağlı kalarak; elde edebilecek, kaydedebilecek, depolayabilecek,
+muhafaza edebilecek, hizmetlerini devam ettirebilmek amacıyla güncelleyebilecek,
+değiştirebilecek, yeniden düzenleyebilecek, mevzuatın izin verdiği durumlarda ve ölçüde
+üçüncü kişilere açıklayabilecek, devredebilecek, aktarabilecek, paylaşabilecek,
+sınıflandırabilecek, anonim hale getirebilecek ve kanunda sayılan diğer şekillerde
+işleyebilecektir.
+Kişisel verilerinizi burada belirtilen işleme amaçları dışında kullanılmayacak, açık
+rızanız ya da ilgili mevzuatta öngörülen sebepler olmaksızın 3.kişilere aktarmayacak ve/veya
+ifşa edilmeyecektir. Kişisel verileriniz 3.kişilerle paylaşılması gereken sebeplerin varlığı
+halinde ise aktarılan bilgiler sadece gerektiği kadarı ile ve ilgisi kapsamında bir aktarım
+yapılacaktır.
+Veri Sorumlusu
+6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVK Kanun”) Geçici 1inci maddesinin
+beşinci fıkrasında, kamu kurum ve kuruluşlarında bu Kanunun uygulanmasıyla ilgili
+koordinasyonu sağlamak üzere üst düzey bir yönetici belirlenerek Başkanlığa bildirileceği
+öngörülmektedir.
+Bu hüküm uyarınca Yargıtay Başkanlığı Genel Sekreterliği, Yargıtay Başkanlığı
+bünyesinde koordinasyonu sağlayacak üst düzey birim olarak belirlenmiştir.
+Hangi Kişisel Verileri İşliyoruz?
+Kimlik Bilgisi: Adı, Soyadı, T.C. Kimlik Numarası, doğum tarihi, paylaştığınız resmi
+kimlik belgeleri üzerindeki diğer nüfus kimlik bilgileri vb.
+İletişim Bilgisi: Telefon, Fax Numarası, E-Posta, KEP Adresi, İletişim Adresi, Posta
+Kodu, Adres numarası.
+Özlük: Bordro bilgileri, Disiplin soruşturması, İşe giriş belgesi kayıtları, Mal bildirim
+bilgileri, Özgeçmiş bilgileri, Performans değerlendirme raporları vb
+Hukuki İşlem: Adli makamlarla yazışmalardaki bilgiler, Dava dosyasındaki bilgiler vb.
+İşlem Güvenliği: IP adresi bilgileri, İnternet sitesi giriş çıkış bilgileri, Şifre ve parola
+bilgileri v.b.
+Mesleki Deneyim: Diploma bilgileri, Gidilen kurslar, Meslek içi eğitim bilgileri,
+Sertifikalar, Transkript bilgileri v.b.
+Görsel ve İşitsel Kayıtlar: Çağrı merkezi görüşme ses kayıtları.
+Fiziksel Mekan Güvenliği : Çalışan ve ziyaretçilerin giriş ve çıkış kayıt bilgileri, Kamera
+kayıtları vb.
+Sendika Üyeliği: Sendika üyeliği bilgileri v.b.
+Sağlık Bilgileri: Engellilik durumuna ait bilgiler, Kan grubu bilgisi, Kişisel sağlık bilgileri,
+Kullanılan cihaz ve protez bilgileri v.b.
+Ceza Mahkûmiyeti Ve Güvenlik Tedbirleri: Ceza mahkûmiyetine ilişkin bilgiler,
+Güvenlik tedbirlerine ilişkin bilgiler v.b.
+Biyometrik Veri: Avuç içi bilgileri, Parmak izi bilgileri, Retina taraması bilgileri, Yüz
+tanıma bilgileri v.b.
+Kişisel Veri İşleme İlkeleri
+Yargıtay Başkanlığı olarak, KVK Kanunun 4. Maddesinde “Kişisel Verilerin İşlenme
+Amaçları” başlığında altında belirtilen amaçlar çerçevesinde, aşağıda sayılan ilkelere uygun
+olarak işlemektedir.
+(1) Kişisel veriler, ancak bu Kanunda ve diğer kanunlarda öngörülen usul ve esaslara
+uygun olarak işlenebilir.
+(2) Kişisel verilerin işlenmesinde aşağıdaki ilkelere uyulması zorunludur:
+a) Hukuka ve dürüstlük kurallarına uygun olma.
+b) Doğru ve gerektiğinde güncel olma.
+c) Belirli, açık ve meşru amaçlar için işlenme.
+ç) İşlendikleri amaçla bağlantılı, sınırlı ve ölçülü olma.
+d) İlgili mevzuatta öngörülen veya işlendikleri amaç için gerekli olan süre kadar
+muhafaza edilme.
+Kişisel Veri İşlemenin Hukuki Sebepleri ve Toplama Yöntemleri
+Yargıtay Başkanlığı, çalışanlarımız, ziyaretçilerimiz ve stajyerlerimize ilişkin kişisel
+verileri KVK Kanunu gereğince, aşağıda sayılan kanallar vasıtasıyla tamamen veya kısmen
+otomatik ya da veri kayıt sisteminin parçası olmak kaydıyla otomatik olmayan yöntemlerle;
+sözlü, yazılı veya elektronik kanallar aracılığıyla kanuna uygun olarak toplamakta ve Kişisel
+Verilerin Korunması Kanunu’nun 5. ve 6. maddelerinde belirtilen veri işleme şartları ve
+amaçları doğrultusunda;
+ 1) İlgili kişinin açık rızasının olması
+2) Aşağıdaki şartlardan birinin varlığı hâlinde, ilgili kişinin açık rızası aranmaksızın;
+a) Kanunlarda açıkça öngörülmesi
+b) Fiili imkânsızlık nedeniyle rızasını açıklayamayacak durumda bulunan veya
+rızasına hukuki geçerlilik tanınmayan kişinin kendisinin ya da bir başkasının hayatı veya
+beden bütünlüğünün korunması için zorunlu olması
+c) Bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması kaydıyla,
+sözleşmenin taraflarına ait kişisel verilerin işlenmesinin gerekli olması
+ç) Veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi için zorunlu
+olması.
+d) İlgili kişinin kendisi tarafından alenileştirilmiş olması
+e) Bir hakkın tesisi, kullanılması veya korunması için veri işlemenin zorunlu olması
+f) İlgili kişinin temel hak ve özgürlüklerine zarar vermemek kaydıyla, veri
+sorumlusunun meşru menfaatleri için veri işlenmesinin zorunlu olması hallerinde
+alınmaktadır.
+Yargıtay Başkanlığınla iletişime geçmeniz ve/veya hukuki ilişkinizin kurulması
+esnasında ve söz konusu ilişkinin devamı süresince sizlerden, işbirliği yaptığımız ya da
+sözleşme ilişkimizin bulunduğu çözüm ortakları, çağrı merkezi, internet portalından,
+düzenlenen eğitimler, organizasyonlar ve benzeri etkinlikler aracılığıyla yukarıda yer verilen
+amaç doğrultusunda ( Kanun’un 5, 6 ve 8. madde hükümlerinde öngörülen çerçevede
+verilebilmesi amacı ile) toplanmaktadır.
+Kişisel Veri İşleme Amaçları
+ Bütün birimlerimiz için ihtiyaç duyulan hizmetlerin tekilleştirilmesi ve daha az kişisel
+veri alınması,
+ Bilgi Güvenliği Süreçlerinin Yürütülmesi, Güvenlik ve risk değerlendirmesi yapılması,
+Erişim Yetkilerinin Dağılımını Sağlamak
+ İnternet sitemizi ne şekilde kullandığınıza dair analiz yapmak ve sizlere daha iyi
+hizmet için iletişim kanallarımızı size özgü hale getirmek,
+ Ziyaretçi Kayıtlarının Oluşturulması ve Takibini sağlayarak misafir deneyimine yönelik
+daha iyi ve hızlı bilgiye ulaşma ve kullanıcı profili oluşturma,
+ Çağrı Merkezi Kayıtlarıyla Talep/Şikayetlerin takibini sağlamak ve sonuçlandırmak
+ İş faaliyetlerimizin incelenmesi ve denetlenmesi yoluyla bu faaliyetlerimizi kanun ve
+mevzuatlara uygun olarak yürütmek
+ Eğitim ve Etik Faaliyetlerinin Yürütülmesi
+ Yasal yükümlülüklerin veya yetkili idari kuruluşların, kurumların ve kişilerin
+taleplerinin yerine getirilmesi amaçlarıyla gizlilik koşullarına uymak kaydı ile gerektiğinde
+paylaşmak için
+ Acil Durum Yönetimi Süreçlerinin Yürütülmesi, Acil veya Ulaşılması gerekli
+durumlarda irtibat kurmak, Fiziksel Mekan Güvenliğinin sağlanması,
+ Çalışanlar İçin Başvuru Süreçleri, İş Akdi Ve Mevzuattan Kaynaklı Yükümlülüklerin
+Yerine Getirilmesi, Yan Haklar Ve Menfaatleri Süreçlerinin Yürütülmesi,
+ İnsan Kaynakları Biriminin yapacağı Görevlendirme Dağılımın Yapılması, Finans Ve
+Muhasebe işlemlerinin yapılması,
+amaçlarıyla bilgi işlenmektedir.
+Kişisel Veri Güvenliği
+Yargıtay Başkanlığı, bilgilerinizin gizliliğinin korunmasına önem vermektedir.
+Bilgiler, ancak iş sürecinin devamı, verilerin toplanma amacının gerektirdiği süre,
+mevzuat da özel süre öngörülüyorsa bu süreye uygun ve yasal zorunluluklar için gerekli
+oldukları sürece saklanmaktadır.
+Veriler muhafaza edildiği sistemleri, sunucuları ve veri tabanlarını, veri güvenliği
+tehditlerine (siber saldırı, hash vb.) karşı korumak için gerekli teknik ve idari tedbirleri
+almaktadır.
+Kişisel Verilerin Aktarılması
+Kişisel verileriniz;
+ Avukatlar, denetçiler, vergi danışmanları ile danışmanlık ve hizmet aldığımız diğer
+üçüncü kişilere; iş süreçlerimizi hukuka ve meşru menfaatlerimize uygun olarak
+yürütebilmemiz, olası bir yargı sürecinde savunma hakkımızı kullanabilmemiz,
+ Tarafınızca yetki verilmiş olan vekil ve temsilcilerinize; hukuki yükümlülüklerimizi
+yerine getirebilmemiz,
+ Düzenleyici ve denetleyici kurumlar ile mahkeme ve icra müdürlükleri gibi sair resmî
+kurumlar ve kişisel verilerinizi talep etmeye yetkili olan diğer kamu kurum veya kuruluşlarına;
+hukuki yükümlülüklerimizi yerine getirebilmemiz,
+ Hizmet aldığımız iş ortaklarımız, ifa yardımcılarımıza hizmetlerimizin geliştirilebilmesi,
+altyapı ve güvenlik süreçlerinin geliştirilebilmesi
+amaçları ile KVK Kanunun 8. ve 9. maddelerinde belirtilen kişisel veri işleme şartları ve
+amaçları çerçevesinde aktarılabilecektir.
+Kişisel Verilerin Muhafaza Süresi
+Kişisel veriler yasa ve hukuka uygun şekilde muhafaza edilecek ve ilgili mevzuatta
+belirtilen veya işlendikleri amaç için gerekli olan azami süre ve herhalde kanuni zamanaşımı
+süreleri kadar muhafaza edilecektir.
+Kişisel Veri Sahibinin Hakları
+T.C. Anayasası’nın 20’nci maddesinde herkesin, kendisiyle ilgili kişisel veriler hakkında
+bilgilendirilme hakkına sahip olduğu ortaya konulmuştur. Bu doğrultuda Kanun’un 11’nci
+maddesinde kişisel veri sahibinin hakları arasında “bilgi talep etme” hakkı da yer almaktadır.
+Şirketimiz, bu kapsamda, T.C. Anayasası’nın 20’nci ve Kanun’un 11’inci maddelerine uygun
+olarak kişisel veri sahibinin bilgi talep etmesi durumunda gerekli bilgilendirmeyi yapmaktadır.
+Ancak Kanun’un 28’inci maddesinde sayılı hallerde, kişisel veri sahipleri Kanun’un
+11’inci maddesindeki (“Kişisel Veri Sahibinin Hakları”) sayılan haklarını ileri
+süremeyeceklerdir. Zira bu durumlar Kanun’da belirtilen veri koruma kapsamı dışında
+tutulmaktadır.
+Kişisel Veri Sahiplerinin Haklarını Kullanması
+İlgili kişi Kanunun 11’inci maddesindeki haklarını Veri Sorumlusuna Başvuru Usul ve
+Esasları Hakkında Tebliğ’e uygun şekilde yazılı olarak ya da kayıtlı elektronik posta (KEP)
+adresi, güvenli elektronik imza, mobil imza ya da ilgili kişi tarafından veri sorumlusuna daha
+önce bildirilen ve veri sorumlusunun sisteminde kayıtlı bulunan elektronik posta adresini
+kullanmak suretiyle veya başvuru amacına yönelik geliştirilmiş bir yazılım ya da uygulama
+vasıtasıyla veri sorumlusuna iletir.
+Veri Sorumlusu: Yargıtay Başkanlığı Genel Sekreterlik
+Islak İmza : Veri Sahibi Başvuru Formu’nu kullanarak yapabilirsiniz.
+E-Posta : kvkk@yargitay.gov.tr
+Uygulama :
+( Bu yolla başvuru cevabında genel nitelikli bilgi paylaşımı olacaktır)
+Adres : İncek Şehit Savcı Mehmet Selim Kiraz Bulvarı No:6 A Blok Ahlatlıbel Çankaya /
+ANKARA
+Kurum, ilettiğiniz bilgi ve belgelerin yanlış olması veya yetkisiz başvuru yapılması,
+geçerli bir dayanaktan yoksun olduğu veya kötüye kullanım amacı taşıdığı tespit edilen
+başvurunuzu reddetme hakkını saklı tutar.
+Kurumumuz cevap vermeden önce kimliğinizi doğrulama hakkı saklıdır.
+İlgili Kişinin Başvurusuna Cevap Vermesi
+Yargıtay Başkanlığı kişisel veri sahibinin başvurularını kabul edebileceği gibi
+gerekçesini açıklayarak reddedebilecektir. Kurumumuz ilgili cevabını kişisel veri sahibine
+yazılı olarak veya elektronik ortamda bildirebilecektir.
+Kişisel veri sahibinin, Kanunun 11’inci maddesi (“Kişisel Veri Sahibinin Hakları”)
+altında yer alan haklara ilişkin talebini anılan usullere uygun olarak Kuruma iletmesi
+durumunda, Kurum talebin niteliğine göre en kısa sürede ve en geç 30 (otuz) gün içinde ilgili
+talebi ücretsiz olarak sonuçlandıracaktır. Ancak, işlemin ayrıca bir maliyeti gerektirmesi
+halinde, aşağıda belirtilen ücret alınabilecektir. Kişisel veri sahibinin başvurusuna Kuruma
+yazılı olarak cevap verecek ise on sayfaya kadar ücret alınmayacak ancak on sayfasının
+üzerindeki her sayfa için Kanun ve ilgili diğer mevzuatlarda belirtildiği şekilde 1 Türk Lirası
+işlem ücreti alabilecektir.
+VERİ SORUMLUSU SIFATIYLA YARGITAY BAŞKANLIĞI TARAFINDAN VEYA ADINA İŞLENECEK
+HER BİR KİŞİSEL VERİ KATEGORİSİ İÇİN GECERLİ VERİ İŞLEME AMAÇLARI HAKKINDA
+DETAYLI BİLGİYE KİŞİSEL VERİLERİ KORUMA KURUMU BAŞKANLIĞI TARAFINDAN TUTULAN
+VERİ SORUMLULARI SİCİLİ (VERBİS) ÜZERİNDEN ERİŞİLEBİLİR. (https://verbis.kvkk.gov.tr)
+GÜNCEL OLMAYAN VEYA HAKKINIZDA YANLIŞ VE/VEYA EKSİK BİLGİ SAHİBİ OLDUĞUMUZU
+DÜŞÜNÜYORSANIZ LÜTFEN MÜMKÜN OLAN EN KISA ZAMANDA MAİL ADRESİ
+kvkk@yargitay.gov.tr ULAŞABİLİRSİNİZ. 

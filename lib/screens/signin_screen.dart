@@ -4,22 +4,48 @@ import 'package:animate_do/animate_do.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:health_pet/providers/auth_providers.dart';
 import 'package:health_pet/screens/signup_screen.dart';
-import 'package:health_pet/screens/forget_password_screen.dart';
+import 'package:health_pet/screens/forget_page.dart';
 
-class SigninScreen extends ConsumerWidget {
+class SigninScreen extends ConsumerStatefulWidget {
   const SigninScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SigninScreen> createState() => _SigninScreenState();
+}
+
+class _SigninScreenState extends ConsumerState<SigninScreen> {
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = ref.read(authControllerProvider);
+    _emailController = TextEditingController(text: authState.email);
+    _passwordController = TextEditingController(text: authState.password);
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final authController = ref.read(authControllerProvider.notifier);
-    final emailController = TextEditingController(text: authState.email);
-    final passwordController = TextEditingController(text: authState.password);
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         appBar: AppBar(
           elevation: 0,
@@ -47,7 +73,15 @@ class SigninScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildHeader(),
-                        _buildLoginForm(authState, authController, context),
+                        _buildLoginForm(
+                          authState,
+                          authController,
+                          context,
+                          _emailController,
+                          _passwordController,
+                          _emailFocusNode,
+                          _passwordFocusNode,
+                        ),
                         _buildSocialLogin(authState, authController, context),
                         _buildSignUpPrompt(context),
                       ],
@@ -89,6 +123,10 @@ class SigninScreen extends ConsumerWidget {
     AuthState state,
     AuthController controller,
     BuildContext context,
+    TextEditingController emailController,
+    TextEditingController passwordController,
+    FocusNode emailFocusNode,
+    FocusNode passwordFocusNode,
   ) {
     return FadeInUp(
       duration: const Duration(milliseconds: 1400),
@@ -96,9 +134,21 @@ class SigninScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           children: [
-            _buildEmailField(state, controller),
+            _buildEmailField(
+              state,
+              controller,
+              emailController,
+              emailFocusNode,
+              context,
+            ),
             const SizedBox(height: 20),
-            _buildPasswordField(state, controller),
+            _buildPasswordField(
+              state,
+              controller,
+              passwordController,
+              passwordFocusNode,
+              context,
+            ),
             const SizedBox(height: 10),
             _buildRememberForgotRow(state, controller, context),
             const SizedBox(height: 30),
@@ -109,7 +159,13 @@ class SigninScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmailField(AuthState state, AuthController controller) {
+  Widget _buildEmailField(
+    AuthState state,
+    AuthController controller,
+    TextEditingController controllerField,
+    FocusNode focusNode,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,18 +175,30 @@ class SigninScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 5),
         TextField(
+          controller: controllerField,
+          focusNode: focusNode,
           keyboardType: TextInputType.emailAddress,
-          onChanged: controller.updateEmail,
+          onChanged: (value) {
+            controller.updateEmail(value);
+            // Kursor pozisyonunu güncelle
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controllerField.selection = TextSelection.fromPosition(
+                TextPosition(offset: controllerField.text.length),
+              );
+            });
+          },
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 10,
+              vertical: 12,
+              horizontal: 15,
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Theme.of(context).primaryColor),
+              borderRadius: BorderRadius.circular(8),
             ),
             errorText: state.email.isNotEmpty && !state.emailValid
                 ? 'Geçerli bir email girin'
@@ -141,7 +209,13 @@ class SigninScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPasswordField(AuthState state, AuthController controller) {
+  Widget _buildPasswordField(
+    AuthState state,
+    AuthController controller,
+    TextEditingController controllerField,
+    FocusNode focusNode,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -151,18 +225,30 @@ class SigninScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 5),
         TextField(
+          controller: controllerField,
+          focusNode: focusNode,
           obscureText: true,
-          onChanged: controller.updatePassword,
+          onChanged: (value) {
+            controller.updatePassword(value);
+            // Kursor pozisyonunu güncelle
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controllerField.selection = TextSelection.fromPosition(
+                TextPosition(offset: controllerField.text.length),
+              );
+            });
+          },
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 10,
+              vertical: 12,
+              horizontal: 15,
             ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Theme.of(context).primaryColor),
+              borderRadius: BorderRadius.circular(8),
             ),
             errorText: state.password.isNotEmpty && !state.passwordValid
                 ? 'Şifre en az 6 karakter olmalı'
@@ -188,7 +274,7 @@ class SigninScreen extends ConsumerWidget {
               onChanged: (_) => controller.toggleRememberPassword(),
               activeColor: const Color(0xFF78C6F7),
             ),
-            const Text('Beni Hatırla', style: TextStyle(color: Colors.black45)),
+            const Text('Beni Hatırla', style: TextStyle(color: Colors.black54)),
           ],
         ),
         TextButton(
@@ -285,7 +371,7 @@ class SigninScreen extends ConsumerWidget {
         children: [
           const Text(
             'Hesabın yok mu? ',
-            style: TextStyle(color: Colors.black45),
+            style: TextStyle(color: Colors.black54),
           ),
           TextButton(
             onPressed: () => Navigator.push(

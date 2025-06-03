@@ -76,6 +76,9 @@ class AuthController extends _$AuthController {
     return AuthState();
   }
 
+  final emailProvider = StateProvider<String>((ref) => '');
+  final passwordProvider = StateProvider<String>((ref) => '');
+
   void updateEmail(String email) {
     final emailValid = _validateEmail(email);
     state = state.copyWith(email: email, emailValid: emailValid, error: null);
@@ -205,5 +208,19 @@ class AuthController extends _$AuthController {
         SnackBar(content: Text(error), backgroundColor: Colors.red),
       );
     });
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      await ref.read(authServiceProvider).signOut();
+      Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
+    } on AuthException catch (e) {
+      _handleError(context, e.toString());
+    } catch (e) {
+      _handleError(context, 'Çıkış yapılırken bir hata oluştu');
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 }
