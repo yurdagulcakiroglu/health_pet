@@ -24,6 +24,8 @@ class AuthService {
   Future<UserCredential> signUpWithEmailAndPassword({
     required String email,
     required String password,
+    required String name,
+    required String surname,
   }) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -33,6 +35,8 @@ class AuthService {
 
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'email': email,
+        'name': name,
+        'surname': surname,
         'createdAt': FieldValue.serverTimestamp(),
         'profileCompleted': false,
       });

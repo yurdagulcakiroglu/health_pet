@@ -42,10 +42,9 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     final authController = ref.read(authControllerProvider.notifier);
 
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         appBar: AppBar(
           elevation: 0,
@@ -60,37 +59,39 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
           ),
         ),
         body: SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildHeader(),
-                        _buildLoginForm(
-                          authState,
-                          authController,
-                          context,
-                          _emailController,
-                          _passwordController,
-                          _emailFocusNode,
-                          _passwordFocusNode,
+                        Column(
+                          children: [
+                            _buildHeader(),
+                            _buildLoginForm(
+                              authState,
+                              authController,
+                              context,
+                              _emailController,
+                              _passwordController,
+                              _emailFocusNode,
+                              _passwordFocusNode,
+                            ),
+                            _buildSocialLogin(ref, context),
+                            _buildSignUpPrompt(context),
+                          ],
                         ),
-                        _buildSocialLogin(authState, authController, context),
-                        _buildSignUpPrompt(context),
+                        _buildBottomImage(),
                       ],
                     ),
                   ),
                 ),
-                _buildBottomImage(),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
@@ -180,7 +181,6 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
           keyboardType: TextInputType.emailAddress,
           onChanged: (value) {
             controller.updateEmail(value);
-            // Kursor pozisyonunu güncelle
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controllerField.selection = TextSelection.fromPosition(
                 TextPosition(offset: controllerField.text.length),
@@ -230,7 +230,6 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
           obscureText: true,
           onChanged: (value) {
             controller.updatePassword(value);
-            // Kursor pozisyonunu güncelle
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controllerField.selection = TextSelection.fromPosition(
                 TextPosition(offset: controllerField.text.length),
@@ -323,42 +322,42 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
-  Widget _buildSocialLogin(
-    AuthState state,
-    AuthController controller,
-    BuildContext context,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        children: [
-          const Text('- VEYA -', style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const FaIcon(
-                  FontAwesomeIcons.google,
-                  size: 25,
-                  color: Colors.black54,
-                ),
-                onPressed: state.isLoading
-                    ? null
-                    : () => controller.signInWithGoogle(context),
+  Widget _buildSocialLogin(WidgetRef ref, BuildContext context) {
+    final authController = ref.read(authControllerProvider.notifier);
+    final isLoading = ref.watch(authControllerProvider).isLoading;
+    return FadeInUp(
+      duration: const Duration(milliseconds: 1400),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: const FaIcon(
+                FontAwesomeIcons.google,
+                size: 25.0,
+                color: Colors.black54,
               ),
-              const SizedBox(width: 20),
-              IconButton(
-                icon: const FaIcon(
-                  FontAwesomeIcons.apple,
-                  size: 30,
-                  color: Colors.black54,
-                ),
-                onPressed: state.isLoading ? null : () {},
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      authController.signInWithGoogle(context);
+                    },
+            ),
+            IconButton(
+              icon: const FaIcon(
+                FontAwesomeIcons.apple,
+                size: 30.0,
+                color: Colors.black54,
               ),
-            ],
-          ),
-        ],
+              onPressed: isLoading
+                  ? null
+                  : () {
+                      // Apple ile giriş fonksiyonunu buraya ekle
+                    },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -379,10 +378,10 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
               MaterialPageRoute(builder: (e) => const SignupPage()),
             ),
             child: const Text(
-              'Kaydol',
+              'Kayıt Ol',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFA1EF7A),
+                color: Color(0xFF78C6F7),
               ),
             ),
           ),
@@ -392,17 +391,10 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
   }
 
   Widget _buildBottomImage() {
-    return FadeInUp(
-      duration: const Duration(milliseconds: 1200),
-      child: Container(
-        height: 200,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/signin.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
+    return SizedBox(
+      width: double.infinity,
+      height: 230,
+      child: Image.asset("assets/images/signin.png", fit: BoxFit.cover),
     );
   }
 }

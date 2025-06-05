@@ -3,7 +3,7 @@ import 'package:health_pet/screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:pet_health/screens/create_pets_profile_screen.dart';
-//import 'package:pets_health/screens/home_page.dart';
+import 'package:health_pet/screens/home_page.dart';
 //import 'package:pet_health/services/notification_service.dart';
 //import 'package:timezone/data/latest.dart' as tz;
 
@@ -42,10 +42,10 @@ class PetHealth extends StatelessWidget {
           backgroundColor: Colors.white,
         ),
       ),
-      //routes: {
-      // '/home': (context) => const PetHealthHomePage(),
-      // '/welcome_screen': (context) => const WelcomeScreen()
-      //},
+      routes: {
+        '/home': (context) => const PetHealthHomePage(),
+        // '/welcome_screen': (context) => const WelcomeScreen()
+      },
       home: const WelcomeScreen(), // WelcomeScreen(),PetHealthHomePage()
     );
   }

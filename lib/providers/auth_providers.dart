@@ -25,6 +25,10 @@ class AuthState {
   final bool passwordValid;
   final bool agreePersonalData;
   final bool confirmPasswordValid;
+  final String name;
+  final String surname;
+  final bool nameValid;
+  final bool surnameValid;
 
   AuthState({
     this.email = '',
@@ -37,9 +41,19 @@ class AuthState {
     this.passwordValid = false,
     this.agreePersonalData = false,
     this.confirmPasswordValid = false,
+    this.name = '',
+    this.surname = '',
+    this.nameValid = false,
+    this.surnameValid = false,
   });
 
-  bool get isFormValid => emailValid && passwordValid && confirmPasswordValid;
+  bool get isFormValid =>
+      emailValid &&
+      passwordValid &&
+      confirmPasswordValid &&
+      nameValid &&
+      surnameValid;
+
   bool get canSignUp => isFormValid && agreePersonalData && !isLoading;
 
   AuthState copyWith({
@@ -53,6 +67,10 @@ class AuthState {
     bool? emailValid,
     bool? passwordValid,
     bool? confirmPasswordValid,
+    String? name,
+    String? surname,
+    bool? nameValid,
+    bool? surnameValid,
   }) {
     return AuthState(
       email: email ?? this.email,
@@ -65,6 +83,10 @@ class AuthState {
       emailValid: emailValid ?? this.emailValid,
       passwordValid: passwordValid ?? this.passwordValid,
       confirmPasswordValid: confirmPasswordValid ?? this.confirmPasswordValid,
+      name: name ?? this.name,
+      surname: surname ?? this.surname,
+      nameValid: nameValid ?? this.nameValid,
+      surnameValid: surnameValid ?? this.surnameValid,
     );
   }
 }
@@ -110,6 +132,20 @@ class AuthController extends _$AuthController {
     );
   }
 
+  void updateName(String name) {
+    final nameValid = name.trim().length >= 2;
+    state = state.copyWith(name: name, nameValid: nameValid, error: null);
+  }
+
+  void updateSurname(String surname) {
+    final surnameValid = surname.trim().length >= 2;
+    state = state.copyWith(
+      surname: surname,
+      surnameValid: surnameValid,
+      error: null,
+    );
+  }
+
   void toggleRememberPassword() {
     state = state.copyWith(rememberPassword: !state.rememberPassword);
   }
@@ -129,7 +165,6 @@ class AuthController extends _$AuthController {
             email: state.email,
             password: state.password,
           );
-      //kullanıcı bilgisi kontrolü
       if (userCredential.user != null) {
         _navigateToHome(context);
       } else {
@@ -155,8 +190,10 @@ class AuthController extends _$AuthController {
           .signUpWithEmailAndPassword(
             email: state.email,
             password: state.password,
+            name: state.name,
+            surname: state.surname,
           );
-      // userCredential kullanılıyor:
+
       if (userCredential.user != null) {
         _navigateToHome(context);
       } else {
@@ -180,7 +217,6 @@ class AuthController extends _$AuthController {
       final userCredential = await ref
           .read(authServiceProvider)
           .signInWithGoogle();
-      // userCredential kullanılıyor:
       if (userCredential.user != null) {
         _navigateToHome(context);
       } else {
@@ -217,7 +253,7 @@ class AuthController extends _$AuthController {
       Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
     } on AuthException catch (e) {
       _handleError(context, e.toString());
-    } catch (e) {
+    } catch (_) {
       _handleError(context, 'Çıkış yapılırken bir hata oluştu');
     } finally {
       state = state.copyWith(isLoading: false);
