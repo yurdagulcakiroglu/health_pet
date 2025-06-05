@@ -302,7 +302,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: state.isFormValid
+        onPressed: state.isSignInFormValid
             ? () => controller.signInWithEmail(context)
             : null,
         style: ElevatedButton.styleFrom(
@@ -342,18 +342,6 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
                   ? null
                   : () {
                       authController.signInWithGoogle(context);
-                    },
-            ),
-            IconButton(
-              icon: const FaIcon(
-                FontAwesomeIcons.apple,
-                size: 30.0,
-                color: Colors.black54,
-              ),
-              onPressed: isLoading
-                  ? null
-                  : () {
-                      // Apple ile giriş fonksiyonunu buraya ekle
                     },
             ),
           ],

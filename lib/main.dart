@@ -37,6 +37,7 @@ class PetHealth extends StatelessWidget {
           selectedItemColor: Color(0xFFA1EF7A),
           unselectedItemColor: Colors.grey,
         ),
+        //appbar tema
         appBarTheme: const AppBarTheme(
           scrolledUnderElevation: 0,
           backgroundColor: Colors.white,

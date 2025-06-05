@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:health_pet/services/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'auth_providers.g.dart';
 
@@ -47,14 +48,11 @@ class AuthState {
     this.surnameValid = false,
   });
 
-  bool get isFormValid =>
-      emailValid &&
-      passwordValid &&
-      confirmPasswordValid &&
-      nameValid &&
-      surnameValid;
+  bool get isSignInFormValid => emailValid && passwordValid;
+  bool get isSignUpFormValid =>
+      isSignInFormValid && confirmPasswordValid && nameValid && surnameValid;
 
-  bool get canSignUp => isFormValid && agreePersonalData && !isLoading;
+  bool get canSignUp => isSignUpFormValid && agreePersonalData && !isLoading;
 
   AuthState copyWith({
     String? email,
@@ -155,7 +153,7 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> signInWithEmail(BuildContext context) async {
-    if (!state.emailValid || !state.passwordValid || state.isLoading) return;
+    if (!state.isSignInFormValid || state.isLoading) return;
 
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -166,6 +164,11 @@ class AuthController extends _$AuthController {
             password: state.password,
           );
       if (userCredential.user != null) {
+        if (state.rememberPassword) {
+          await saveCredentials();
+        } else {
+          await clearCredentials();
+        }
         _navigateToHome(context);
       } else {
         throw AuthException('no-user', 'Kullanıcı bilgisi alınamadı');
@@ -258,5 +261,36 @@ class AuthController extends _$AuthController {
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  Future<void> saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', state.email);
+    await prefs.setString('password', state.password);
+  }
+
+  Future<void> loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('email') ?? '';
+    final savedPassword = prefs.getString('password') ?? '';
+
+    state = state.copyWith(
+      email: savedEmail,
+      password: savedPassword,
+      emailValid: _validateEmail(savedEmail),
+      passwordValid: savedPassword.length >= 6,
+    );
+  }
+
+  Future<void> clearCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    await prefs.remove('password');
+    state = state.copyWith(
+      email: '',
+      password: '',
+      emailValid: false,
+      passwordValid: false,
+    );
   }
 }
