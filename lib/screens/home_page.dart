@@ -1,72 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/providers/pet_profile_provider.dart';
 import 'package:health_pet/screens/create_pet_profile_screen.dart';
+import 'package:health_pet/screens/pet_detail_screen.dart';
 import 'package:health_pet/theme/bottom_navigation_bar.dart';
 
-class PetHealthHomePage extends ConsumerStatefulWidget {
+class PetHealthHomePage extends ConsumerWidget {
   const PetHealthHomePage({super.key});
 
   @override
-  ConsumerState<PetHealthHomePage> createState() => _PetHealthHomePageState();
-}
-
-class _PetHealthHomePageState extends ConsumerState<PetHealthHomePage> {
-  late Future<List<Map<String, dynamic>>> _petsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPets();
-  }
-
-  Future<void> _loadPets() async {
+  Widget build(BuildContext context, WidgetRef ref) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      setState(() {
-        _petsFuture = ref.read(petProfileProvider.notifier).getUserPets(userId);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final petsAsync = userId != null ? ref.watch(userPetsProvider) : null;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Evcil Hayvanlarım'),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadPets),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.refresh(userPetsProvider),
+          ),
         ],
       ),
       body: userId == null
           ? _buildNotLoggedIn()
-          : FutureBuilder<List<Map<String, dynamic>>>(
-              future: _petsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Hata: ${snapshot.error}'));
-                }
-                final pets = snapshot.data ?? [];
-                return pets.isEmpty ? _buildEmptyState() : _buildPetGrid(pets);
-              },
-            ),
+          : petsAsync?.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Center(child: Text('Hata: $error')),
+                  data: (pets) => pets.isEmpty
+                      ? _buildEmptyState(context)
+                      : _buildPetGrid(pets),
+                ) ??
+                const SizedBox(),
       floatingActionButton: userId != null
           ? FloatingActionButton(
               onPressed: () => _navigateToCreatePet(context, userId),
               child: const Icon(Icons.add),
             )
           : null,
-      bottomNavigationBar: const CustomBottomNavigationBar(
-        userId: '',
-        petId: '',
-      ),
+      bottomNavigationBar:
+          petsAsync?.when(
+            data: (pets) => CustomBottomNavigationBar(
+              userId: userId ?? '',
+              petId: pets.isNotEmpty ? pets.first.id ?? '' : '',
+            ),
+            loading: () =>
+                const CustomBottomNavigationBar(userId: '', petId: ''),
+            error: (_, __) =>
+                const CustomBottomNavigationBar(userId: '', petId: ''),
+          ) ??
+          const CustomBottomNavigationBar(userId: '', petId: ''),
     );
   }
 
@@ -76,7 +64,7 @@ class _PetHealthHomePageState extends ConsumerState<PetHealthHomePage> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +82,7 @@ class _PetHealthHomePageState extends ConsumerState<PetHealthHomePage> {
     );
   }
 
-  Widget _buildPetGrid(List<Map<String, dynamic>> pets) {
+  Widget _buildPetGrid(List<Pet> pets) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -114,12 +102,12 @@ class _PetHealthHomePageState extends ConsumerState<PetHealthHomePage> {
       MaterialPageRoute(
         builder: (context) => CreatePetProfileScreen(userId: userId),
       ),
-    ).then((_) => _loadPets());
+    );
   }
 }
 
 class _PetCard extends StatelessWidget {
-  final Map<String, dynamic> pet;
+  final Pet pet;
 
   const _PetCard({required this.pet});
 
@@ -128,53 +116,65 @@ class _PetCard extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          // Pet detay sayfasına yönlendirme
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PetDetailsScreen(petId: pet.id!),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child: pet.profilePictureUrl?.isNotEmpty == true
+                    ? Image.network(
+                        pet.profilePictureUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                      )
+                    : _buildPlaceholder(),
               ),
-              child: pet['profilePictureUrl']?.isNotEmpty == true
-                  ? Image.network(
-                      pet['profilePictureUrl'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildPlaceholder(),
-                    )
-                  : _buildPlaceholder(),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  pet['name'] ?? 'İsimsiz',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    pet.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${pet['type'] ?? '-'} • ${pet['breed'] ?? '-'}',
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Yaş: ${_calculateAge(pet['birthDate'])}',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    '${pet.type} • ${pet.breed}',
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Yaş: ${_calculateAge(pet.birthDate)}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -188,14 +188,18 @@ class _PetCard extends StatelessWidget {
     );
   }
 
-  String _calculateAge(String? birthDate) {
-    if (birthDate == null || birthDate.isEmpty) return 'Bilinmiyor';
+  String _calculateAge(String birthDate) {
     try {
       final birth = DateTime.parse(birthDate);
-      final age = DateTime.now().difference(birth).inDays ~/ 365;
-      return '$age';
+      final now = DateTime.now();
+      int age = now.year - birth.year;
+      if (now.month < birth.month ||
+          (now.month == birth.month && now.day < birth.day)) {
+        age--;
+      }
+      return '$age yaşında';
     } catch (e) {
-      return '?';
+      return 'Yaş hesaplanamadı';
     }
   }
 }

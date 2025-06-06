@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/providers/pet_profile_provider.dart';
 import 'package:health_pet/screens/home_page.dart';
 import 'package:health_pet/theme/bottom_navigation_bar.dart';
@@ -53,11 +54,11 @@ class CreatePetProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _NameInput(state.name, notifier.updateName),
-                _BirthDateInput(state.birthDate, notifier.updateBirthDate),
-                _TypeInput(state.type, notifier.updateType),
-                _BreedInput(state.breed, notifier.updateBreed),
-                _GenderDropdown(state.gender, notifier.updateGender),
+                _NameInput(notifier),
+                _BirthDateInput(notifier),
+                _TypeInput(notifier),
+                _BreedInput(notifier),
+                _GenderDropdown(notifier),
                 if (state.error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20),
@@ -66,7 +67,7 @@ class CreatePetProfileScreen extends ConsumerWidget {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                _SaveButton(userId, state.isLoading),
+                _SaveButton(userId: userId, isLoading: state.isLoading),
                 const SizedBox(height: 20),
               ],
             ),
@@ -81,31 +82,37 @@ class CreatePetProfileScreen extends ConsumerWidget {
   }
 }
 
-class _NameInput extends StatelessWidget {
-  final String value;
-  final Function(String) onChanged;
+class _NameInput extends ConsumerWidget {
+  final PetProfileNotifier notifier;
 
-  const _NameInput(this.value, this.onChanged);
+  const _NameInput(this.notifier);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = ref.watch(
+      petProfileProvider.select((state) => state.pet.name),
+    );
+
     return _InputField(
       label: "Ad",
-      value: value,
-      onChanged: onChanged,
+      value: name,
+      onChanged: notifier.updateName,
       validator: (v) => v!.isEmpty ? 'Bu alan boş bırakılamaz' : null,
     );
   }
 }
 
-class _BirthDateInput extends StatelessWidget {
-  final String value;
-  final Function(String) onChanged;
+class _BirthDateInput extends ConsumerWidget {
+  final PetProfileNotifier notifier;
 
-  const _BirthDateInput(this.value, this.onChanged);
+  const _BirthDateInput(this.notifier);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final birthDate = ref.watch(
+      petProfileProvider.select((state) => state.pet.birthDate),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -120,7 +127,7 @@ class _BirthDateInput extends StatelessWidget {
         const SizedBox(height: 5),
         TextFormField(
           readOnly: true,
-          controller: TextEditingController(text: value),
+          controller: TextEditingController(text: birthDate),
           onTap: () async {
             final selectedDate = await showDatePicker(
               context: context,
@@ -129,7 +136,9 @@ class _BirthDateInput extends StatelessWidget {
               lastDate: DateTime(2100),
             );
             if (selectedDate != null) {
-              onChanged("${selectedDate.toLocal()}".split(' ')[0]);
+              notifier.updateBirthDate(
+                "${selectedDate.toLocal()}".split(' ')[0],
+              );
             }
           },
           validator: (v) => v!.isEmpty ? 'Bu alan boş bırakılamaz' : null,
@@ -153,36 +162,95 @@ class _BirthDateInput extends StatelessWidget {
   }
 }
 
-class _TypeInput extends StatelessWidget {
-  final String value;
-  final Function(String) onChanged;
+class _TypeInput extends ConsumerWidget {
+  final PetProfileNotifier notifier;
 
-  const _TypeInput(this.value, this.onChanged);
+  const _TypeInput(this.notifier);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final type = ref.watch(
+      petProfileProvider.select((state) => state.pet.type),
+    );
+
     return _InputField(
       label: "Tür",
-      value: value,
-      onChanged: onChanged,
+      value: type,
+      onChanged: notifier.updateType,
       validator: (v) => v!.isEmpty ? 'Bu alan boş bırakılamaz' : null,
     );
   }
 }
 
-class _BreedInput extends StatelessWidget {
-  final String value;
-  final Function(String) onChanged;
+class _BreedInput extends ConsumerWidget {
+  final PetProfileNotifier notifier;
 
-  const _BreedInput(this.value, this.onChanged);
+  const _BreedInput(this.notifier);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final breed = ref.watch(
+      petProfileProvider.select((state) => state.pet.breed),
+    );
+
     return _InputField(
       label: "Irk",
-      value: value,
-      onChanged: onChanged,
+      value: breed,
+      onChanged: notifier.updateBreed,
       validator: (v) => v!.isEmpty ? 'Bu alan boş bırakılamaz' : null,
+    );
+  }
+}
+
+class _GenderDropdown extends ConsumerWidget {
+  final PetProfileNotifier notifier;
+
+  const _GenderDropdown(this.notifier);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gender = ref.watch(
+      petProfileProvider.select((state) => state.pet.gender),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Cinsiyet',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 5),
+        DropdownButtonFormField<String>(
+          value: gender,
+          items: ['Erkek', 'Dişi']
+              .map(
+                (gender) => DropdownMenuItem<String>(
+                  value: gender,
+                  child: Text(gender),
+                ),
+              )
+              .toList(),
+          onChanged: (newValue) => notifier.updateGender(newValue!),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 0,
+              horizontal: 10,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade400),
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade400),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 }
@@ -237,64 +305,16 @@ class _InputField extends StatelessWidget {
   }
 }
 
-class _GenderDropdown extends StatelessWidget {
-  final String value;
-  final Function(String) onChanged;
-
-  const _GenderDropdown(this.value, this.onChanged);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Cinsiyet',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 5),
-        DropdownButtonFormField<String>(
-          value: value,
-          items: ['Erkek', 'Dişi']
-              .map(
-                (gender) => DropdownMenuItem<String>(
-                  value: gender,
-                  child: Text(gender),
-                ),
-              )
-              .toList(),
-          onChanged: (newValue) => onChanged(newValue!),
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 0,
-              horizontal: 10,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade400),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-}
-
 class _SaveButton extends ConsumerWidget {
   final String userId;
   final bool isLoading;
 
-  const _SaveButton(this.userId, this.isLoading);
+  const _SaveButton({required this.userId, required this.isLoading});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(petProfileProvider.notifier);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -311,7 +331,7 @@ class _SaveButton extends ConsumerWidget {
         child: MaterialButton(
           minWidth: double.infinity,
           height: 50,
-          onPressed: isLoading ? null : () => _saveProfile(context, ref),
+          onPressed: isLoading ? null : () => _saveProfile(context, notifier),
           color: const Color(0xFF78C6F7),
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -328,19 +348,26 @@ class _SaveButton extends ConsumerWidget {
     );
   }
 
-  Future<void> _saveProfile(BuildContext context, WidgetRef ref) async {
+  Future<void> _saveProfile(
+    BuildContext context,
+    PetProfileNotifier notifier,
+  ) async {
     try {
-      await ref.read(petProfileProvider.notifier).addPetProfile(userId);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const PetHealthHomePage()),
-      );
+      await notifier.savePet(userId);
+      if (context.mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const PetHealthHomePage()),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Hata: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }
