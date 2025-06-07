@@ -102,11 +102,20 @@ class PetDetailsScreen extends ConsumerWidget {
           Center(
             child: CircleAvatar(
               radius: 60,
-              backgroundImage: pet.profilePictureUrl != null
+              backgroundColor: Colors.grey[200], // Arkaplan rengi (opsiyonel)
+              backgroundImage:
+                  (pet.profilePictureUrl != null &&
+                      pet.profilePictureUrl!.isNotEmpty)
                   ? NetworkImage(pet.profilePictureUrl!)
                   : null,
-              child: pet.profilePictureUrl == null
-                  ? const Icon(Icons.pets, size: 60)
+              child:
+                  (pet.profilePictureUrl == null ||
+                      pet.profilePictureUrl!.isEmpty)
+                  ? Icon(
+                      Icons.pets, // Flutter'ın pati ikonu
+                      size: 50,
+                      color: Colors.blue[800], // İstediğiniz renk
+                    )
                   : null,
             ),
           ),

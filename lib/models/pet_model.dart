@@ -1,5 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+class Vaccine {
+  final String name;
+  final DateTime date;
+
+  Vaccine({required this.name, required this.date});
+}
+
+class Medication {
+  final String name;
+  final DateTime date;
+  final bool reminder;
+
+  Medication({required this.name, required this.date, required this.reminder});
+}
+
+class WeightRecord {
+  final DateTime date;
+  final double weight;
+
+  WeightRecord({required this.date, required this.weight});
+}
+
 class Pet {
   final String? id;
   final String name;
@@ -10,6 +32,9 @@ class Pet {
   final String? profilePictureUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final List<Vaccine> vaccineHistory;
+  final List<Medication> medicationHistory;
+  final List<WeightRecord> weightHistory;
 
   Pet({
     this.id,
@@ -21,10 +46,13 @@ class Pet {
     this.profilePictureUrl,
     this.createdAt,
     this.updatedAt,
+    required this.vaccineHistory,
+    required this.medicationHistory,
+    required this.weightHistory,
   });
 
   // Firestore'dan veri alırken kullanılacak factory constructor
-  factory Pet.fromFirestore(DocumentSnapshot doc) {
+  factory Pet.fromFirestore(DocumentSnapshot doc, [param1]) {
     final data = doc.data() as Map<String, dynamic>;
     return Pet(
       id: doc.id,
@@ -35,6 +63,9 @@ class Pet {
       gender: data['gender'] ?? 'Dişi',
       profilePictureUrl: data['profilePictureUrl'],
       createdAt: data['createdAt']?.toDate(),
+      vaccineHistory: [],
+      medicationHistory: [],
+      weightHistory: [],
     );
   }
 
@@ -70,7 +101,10 @@ class Pet {
       birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
-      createdAt: createdAt, // Genellikle değiştirilmez
+      createdAt: createdAt,
+      vaccineHistory: [],
+      medicationHistory: [],
+      weightHistory: [],
     );
   }
 }

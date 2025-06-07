@@ -50,15 +50,18 @@ dependencies:
   flutter_datetime_picker: ^1.5.1
   google_maps_flutter: ^2.9.0
   location: ^8.0.0
-  flutter_dotenv: ^5.1.0
-  google_place: ^0.4.7
-  http: ^0.13.6
+  flutter_dotenv: ^5.2.1
   timezone: ^0.9.4
   #flutter_google_places_sdk: ^0.3.2+9
   permission_handler: ^12.0.0+1
   workmanager: ^0.6.0
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
+  fl_chart: ^1.0.0
+  intl: ^0.18.1
+  uuid: ^4.5.1
+  http: ^1.4.0
+  openai_dart: ^0.4.5
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +86,8 @@ flutter:
   assets:
     - assets/images/  
     - assets/kvkk_text/
+    - assets/.env
+
 dependency_overrides:
   flutter_google_places_sdk_platform_interface: 0.3.0  # Web ile uyumlu sürüm
   flutter_google_places_sdk_web: ^0.2.0  # Güncel web sürümü

@@ -5,7 +5,7 @@ import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/providers/pet_profile_provider.dart';
 import 'package:health_pet/screens/create_pet_profile_screen.dart';
 import 'package:health_pet/screens/pet_detail_screen.dart';
-import 'package:health_pet/theme/bottom_navigation_bar.dart';
+import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 
 class PetHealthHomePage extends ConsumerWidget {
   const PetHealthHomePage({super.key});

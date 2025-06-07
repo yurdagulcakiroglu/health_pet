@@ -86,7 +86,15 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
     required this.imagePicker,
   }) : super(
          PetProfileState(
-           pet: Pet(name: '', birthDate: '', type: '', breed: ''),
+           pet: Pet(
+             name: '',
+             birthDate: '',
+             type: '',
+             breed: '',
+             vaccineHistory: [],
+             medicationHistory: [],
+             weightHistory: [],
+           ),
          ),
        );
 
@@ -234,7 +242,15 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
 
   void resetState() {
     state = PetProfileState(
-      pet: Pet(name: '', birthDate: '', type: '', breed: ''),
+      pet: Pet(
+        name: '',
+        birthDate: '',
+        type: '',
+        breed: '',
+        vaccineHistory: [],
+        medicationHistory: [],
+        weightHistory: [],
+      ),
     );
   }
 }
