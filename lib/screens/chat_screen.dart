@@ -236,7 +236,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("AIngel Asistan"),
-        automaticallyImplyLeading: false,
+        //automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [

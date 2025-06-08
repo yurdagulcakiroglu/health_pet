@@ -90,7 +90,9 @@ class ChatService {
    - Olası Nedenler
    - Öneriler
    - Veteriner Uyarısı (gerekiyorsa)
-5. Sonunda her zaman "Başka bir sorunuz var mı?" diye sor.
+   ama sadece gerekli olanları kullanıcıya cevap olarak ver.
+5. kullanıcıyı bilgilendirici ve destekleyici ol.
+6. sorulara net ve anlaşılır cevaplar ver
 ''';
 
   String _buildPrompt(String text, Pet? pet) {
