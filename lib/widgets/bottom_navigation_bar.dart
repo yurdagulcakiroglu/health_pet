@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/providers/navigation_provider.dart';
-import 'package:health_pet/screens/chatbot_screen.dart';
+import 'package:health_pet/screens/chat_welcome_screen.dart';
 import 'package:health_pet/screens/home_page.dart';
 //import 'package:health_pet/screens/profiles_screen.dart';
 //import 'package:health_pet/screens/reminder_screen.dart';
@@ -67,9 +67,7 @@ class CustomBottomNavigationBar extends ConsumerWidget {
       case 3:
         return const PetHealthHomePage(); //HealthTipsScreen();
       case 4:
-        return const PetChatScreen(
-          userPets: [],
-        ); //PetHealthHomePage(); //SettingsScreen();
+        return ChatWelcomeScreen(); //PetHealthHomePage(); //SettingsScreen();
       default:
         return const PetHealthHomePage();
     }

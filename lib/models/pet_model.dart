@@ -5,6 +5,17 @@ class Vaccine {
   final DateTime date;
 
   Vaccine({required this.name, required this.date});
+
+  Map<String, dynamic> toMap() {
+    return {'name': name, 'date': Timestamp.fromDate(date)};
+  }
+
+  factory Vaccine.fromMap(Map<String, dynamic> map) {
+    return Vaccine(
+      name: map['name'] ?? '',
+      date: (map['date'] as Timestamp).toDate(),
+    );
+  }
 }
 
 class Medication {
@@ -13,6 +24,22 @@ class Medication {
   final bool reminder;
 
   Medication({required this.name, required this.date, required this.reminder});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'date': Timestamp.fromDate(date),
+      'reminder': reminder,
+    };
+  }
+
+  factory Medication.fromMap(Map<String, dynamic> map) {
+    return Medication(
+      name: map['name'] ?? '',
+      date: (map['date'] as Timestamp).toDate(),
+      reminder: map['reminder'] ?? false,
+    );
+  }
 }
 
 class WeightRecord {
@@ -20,6 +47,17 @@ class WeightRecord {
   final double weight;
 
   WeightRecord({required this.date, required this.weight});
+
+  Map<String, dynamic> toMap() {
+    return {'date': Timestamp.fromDate(date), 'weight': weight};
+  }
+
+  factory WeightRecord.fromMap(Map<String, dynamic> map) {
+    return WeightRecord(
+      date: (map['date'] as Timestamp).toDate(),
+      weight: (map['weight'] as num).toDouble(),
+    );
+  }
 }
 
 class Pet {
@@ -30,6 +68,7 @@ class Pet {
   final String breed;
   final String gender;
   final String? profilePictureUrl;
+  final String userId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<Vaccine> vaccineHistory;
@@ -42,8 +81,9 @@ class Pet {
     required this.birthDate,
     required this.type,
     required this.breed,
-    this.gender = 'Dişi', // Varsayılan değer
+    this.gender = 'Dişi',
     this.profilePictureUrl,
+    required this.userId,
     this.createdAt,
     this.updatedAt,
     required this.vaccineHistory,
@@ -51,8 +91,7 @@ class Pet {
     required this.weightHistory,
   });
 
-  // Firestore'dan veri alırken kullanılacak factory constructor
-  factory Pet.fromFirestore(DocumentSnapshot doc, [param1]) {
+  factory Pet.fromFirestore(DocumentSnapshot doc, param1) {
     final data = doc.data() as Map<String, dynamic>;
     return Pet(
       id: doc.id,
@@ -62,14 +101,20 @@ class Pet {
       birthDate: data['birthDate'] ?? '',
       gender: data['gender'] ?? 'Dişi',
       profilePictureUrl: data['profilePictureUrl'],
+      userId: data['userId'] as String? ?? '', // userId alanını ekledik
       createdAt: data['createdAt']?.toDate(),
-      vaccineHistory: [],
-      medicationHistory: [],
-      weightHistory: [],
+      vaccineHistory: (data['vaccineHistory'] as List<dynamic>? ?? [])
+          .map((e) => Vaccine.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      medicationHistory: (data['medicationHistory'] as List<dynamic>? ?? [])
+          .map((e) => Medication.fromMap(e as Map<String, dynamic>))
+          .toList(),
+      weightHistory: (data['weightHistory'] as List<dynamic>? ?? [])
+          .map((e) => WeightRecord.fromMap(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
-  // Firestore'a veri kaydederken
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
@@ -78,33 +123,59 @@ class Pet {
       'birthDate': birthDate,
       'gender': gender,
       'profilePictureUrl': profilePictureUrl,
+      'userId': userId,
+      'vaccineHistory': vaccineHistory.map((v) => v.toMap()).toList(),
+      'medicationHistory': medicationHistory.map((m) => m.toMap()).toList(),
+      'weightHistory': weightHistory.map((w) => w.toMap()).toList(),
       'updatedAt': FieldValue.serverTimestamp(),
       if (createdAt != null) 'createdAt': createdAt,
     };
   }
 
-  // Kopyalama metodu
   Pet copyWith({
     String? id,
     String? name,
+    String? birthDate,
     String? type,
     String? breed,
-    String? birthDate,
     String? gender,
     String? profilePictureUrl,
+    String? userId,
+    DateTime? createdAt,
+    List<Vaccine>? vaccineHistory,
+    List<Medication>? medicationHistory,
+    List<WeightRecord>? weightHistory,
   }) {
     return Pet(
       id: id ?? this.id,
       name: name ?? this.name,
+      birthDate: birthDate ?? this.birthDate,
       type: type ?? this.type,
       breed: breed ?? this.breed,
-      birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
-      createdAt: createdAt,
-      vaccineHistory: [],
-      medicationHistory: [],
-      weightHistory: [],
+      userId: userId ?? this.userId,
+      createdAt: createdAt ?? this.createdAt,
+      vaccineHistory: vaccineHistory ?? this.vaccineHistory,
+      medicationHistory: medicationHistory ?? this.medicationHistory,
+      weightHistory: weightHistory ?? this.weightHistory,
     );
+  }
+
+  int get age {
+    try {
+      final birthDateTime = DateTime.parse(birthDate);
+      final now = DateTime.now();
+
+      int age = now.year - birthDateTime.year;
+
+      if (now.month < birthDateTime.month ||
+          (now.month == birthDateTime.month && now.day < birthDateTime.day)) {
+        age--;
+      }
+      return age;
+    } catch (e) {
+      return 0;
+    }
   }
 }

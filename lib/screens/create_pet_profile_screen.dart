@@ -353,7 +353,7 @@ class _SaveButton extends ConsumerWidget {
     PetProfileNotifier notifier,
   ) async {
     try {
-      await notifier.savePet(userId);
+      await notifier.savePet();
       if (context.mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const PetHealthHomePage()),

@@ -13,12 +13,14 @@ class PetProfileState {
   final File? imageFile;
   final bool isLoading;
   final String? error;
+  final bool hasNewImage;
 
   PetProfileState({
     required this.pet,
     this.imageFile,
     this.isLoading = false,
     this.error,
+    this.hasNewImage = false,
   });
 
   PetProfileState copyWith({
@@ -26,12 +28,14 @@ class PetProfileState {
     File? imageFile,
     bool? isLoading,
     String? error,
+    bool? hasNewImage,
   }) {
     return PetProfileState(
       pet: pet ?? this.pet,
       imageFile: imageFile ?? this.imageFile,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      hasNewImage: hasNewImage ?? this.hasNewImage,
     );
   }
 }
@@ -59,7 +63,7 @@ final petDetailsProvider = FutureProvider.family<Pet, String>((
       .get();
 
   if (!doc.exists) throw Exception('Pet bulunamadı');
-  return Pet.fromFirestore(doc);
+  return Pet.fromFirestore(doc, doc.id);
 });
 
 final userPetsProvider = FutureProvider<List<Pet>>((ref) async {
@@ -71,7 +75,7 @@ final userPetsProvider = FutureProvider<List<Pet>>((ref) async {
       .orderBy('createdAt', descending: true)
       .get();
 
-  return snapshot.docs.map(Pet.fromFirestore).toList();
+  return snapshot.docs.map((doc) => Pet.fromFirestore(doc, doc.id)).toList();
 });
 
 //  NOTIFIER SINIFI
@@ -87,10 +91,16 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
   }) : super(
          PetProfileState(
            pet: Pet(
+             id: null,
              name: '',
              birthDate: '',
              type: '',
              breed: '',
+             gender: 'Dişi',
+             profilePictureUrl: null,
+             userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+             createdAt: null,
+             updatedAt: null,
              vaccineHistory: [],
              medicationHistory: [],
              weightHistory: [],
@@ -107,30 +117,43 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
       );
 
       if (pickedImage != null) {
-        state = state.copyWith(imageFile: File(pickedImage.path), error: null);
+        state = state.copyWith(
+          imageFile: File(pickedImage.path),
+          error: null,
+          hasNewImage: true,
+        );
       }
     } catch (e) {
       state = state.copyWith(error: 'Resim seçilemedi: ${e.toString()}');
+      rethrow;
     }
   }
 
   Future<String?> _uploadImage() async {
-    if (state.imageFile == null) return state.pet.profilePictureUrl;
+    if (!state.hasNewImage || state.imageFile == null) {
+      return state.pet.profilePictureUrl;
+    }
 
     try {
       final fileName = path.basename(state.imageFile!.path);
       final destination =
-          'pet_images/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+          'pet_images/${FirebaseAuth.instance.currentUser?.uid}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
       final ref = storage.ref().child(destination);
       await ref.putFile(state.imageFile!);
       return await ref.getDownloadURL();
     } catch (e) {
       state = state.copyWith(error: 'Resim yüklenemedi: ${e.toString()}');
-      return null;
+      rethrow;
     }
   }
 
-  Future<void> savePet(String userId, {String? petId}) async {
+  Future<void> savePet({String? petId}) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      state = state.copyWith(error: 'Kullanıcı giriş yapmamış');
+      return;
+    }
+
     if (!_validateFields()) return;
 
     state = state.copyWith(isLoading: true, error: null);
@@ -139,6 +162,7 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
       final imageUrl = await _uploadImage();
       final updatedPet = state.pet.copyWith(
         profilePictureUrl: imageUrl ?? state.pet.profilePictureUrl,
+        userId: userId,
       );
 
       if (petId == null) {
@@ -155,17 +179,23 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
             .doc(petId)
             .update(updatedPet.toFirestore());
       }
-
-      resetState();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'İşlem başarısız: ${e.toString()}',
       );
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 
-  Future<void> deletePet(String userId, String petId) async {
+  Future<void> deletePet(String petId) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      state = state.copyWith(error: 'Kullanıcı giriş yapmamış');
+      return;
+    }
+
     try {
       await firestore
           .collection('users')
@@ -179,39 +209,65 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
     }
   }
 
-  // PetProfileNotifier içine ekleyin
-  void updateField(String fieldName, String value, String petId) {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
+  Future<void> updateField(
+    String fieldName,
+    dynamic value,
+    String petId,
+  ) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      state = state.copyWith(error: 'Kullanıcı giriş yapmamış');
+      return;
+    }
 
-    firestore
-        .collection('users')
-        .doc(userId)
-        .collection('pets')
-        .doc(petId)
-        .update({fieldName: value});
+    try {
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('pets')
+          .doc(petId)
+          .update({
+            fieldName: value,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
 
-    // State güncelleme
-    switch (fieldName) {
-      case 'name':
-        updateName(value);
-        break;
-      case 'type':
-        updateType(value);
-        break;
-      case 'breed':
-        updateBreed(value);
-        break;
-      case 'birthDate':
-        updateBirthDate(value);
-        break;
-      case 'gender':
-        updateGender(value);
-        break;
+      // State güncelle
+      switch (fieldName) {
+        case 'name':
+          updateName(value as String);
+          break;
+        case 'type':
+          updateType(value as String);
+          break;
+        case 'breed':
+          updateBreed(value as String);
+          break;
+        case 'birthDate':
+          updateBirthDate(value as String);
+          break;
+        case 'gender':
+          updateGender(value as String);
+          break;
+        case 'profilePictureUrl':
+          state = state.copyWith(
+            pet: state.pet.copyWith(profilePictureUrl: value as String?),
+          );
+          break;
+      }
+    } catch (e) {
+      state = state.copyWith(error: 'Güncelleme başarısız: ${e.toString()}');
+      rethrow;
     }
   }
 
   void loadPetForEditing(Pet pet) {
-    state = PetProfileState(pet: pet);
+    state = PetProfileState(
+      pet: pet,
+      imageFile: null,
+      isLoading: false,
+      error: null,
+      hasNewImage: false,
+    );
   }
 
   void updateName(String name) =>
@@ -250,7 +306,9 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
         vaccineHistory: [],
         medicationHistory: [],
         weightHistory: [],
+        userId: '',
       ),
+      hasNewImage: false,
     );
   }
 }

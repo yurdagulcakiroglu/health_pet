@@ -77,9 +77,7 @@ class PetDetailsScreen extends ConsumerWidget {
             icon: const Icon(Icons.delete),
             onPressed: () async {
               final userId = FirebaseAuth.instance.currentUser!.uid;
-              await ref
-                  .read(petProfileProvider.notifier)
-                  .deletePet(userId, petId);
+              await ref.read(petProfileProvider.notifier).deletePet(petId);
               if (context.mounted) Navigator.pop(context);
             },
           ),
