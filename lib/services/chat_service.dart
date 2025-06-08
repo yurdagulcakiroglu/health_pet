@@ -1,235 +1,131 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:health_pet/models/chat_message.dart';
 import 'package:health_pet/models/pet_model.dart';
 
 class ChatService {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
-  final String _hfToken;
-  final Map<String, String> _models;
-  final String _defaultModel;
+  final String _deepseekToken;
+  static const String _model = 'deepseek-r1:free';
+  static const Duration _apiTimeout = Duration(seconds: 30);
+  static const int _maxRetries = 3;
+  static const int _initialRetryDelay = 2;
 
-  ChatService({
-    required String hfToken,
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-    Map<String, String>? models,
-    String defaultModel = 'mistralai/Mistral-7B-Instruct-v0.1',
-  }) : _hfToken = hfToken,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _auth = auth ?? FirebaseAuth.instance,
-       _models =
-           models ??
-           {
-             'mistral': 'mistralai/Mistral-7B-Instruct-v0.1',
-             'llama': 'meta-llama/Llama-2-7b-chat-hf',
-             'zephyr': 'HuggingFaceH4/zephyr-7b-beta',
-           },
-       _defaultModel = defaultModel;
+  ChatService({required String deepseekToken}) : _deepseekToken = deepseekToken;
 
-  Stream<List<ChatMessage>> messages({String? userId}) {
-    final uid = userId ?? _auth.currentUser?.uid;
-    if (uid == null) {
-      // Kullanıcı yoksa boş liste döndür
-      return Stream.value([]);
-    }
+  /* ---------- Dış API’ye çağrı ---------- */
+  Future<ChatMessage> getAIResponse(String text, Pet? pet) async {
+    final prompt = _buildPrompt(text, pet);
+    final aiResponse = await _queryAIWithRetry(prompt);
 
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('chatMessages')
-        .orderBy('timestamp', descending: true)
-        .limit(100)
-        .snapshots()
-        .map(
-          (snap) => snap.docs
-              .map(
-                (d) => ChatMessage.fromFirestore(d, null),
-              ) // parametre düzeltildi
-              .toList()
-              .reversed
-              .toList(),
-        );
+    return ChatMessage(
+      content: aiResponse,
+      isUser: false,
+      timestamp: DateTime.now(),
+      selectedPetId: pet?.id,
+      userId: 'assistant',
+    );
   }
 
-  Future<void> sendUser(String text, Pet? pet) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      // Kullanıcı mesajını kaydet
-      final userMsg = ChatMessage(
-        content: text,
-        isUser: true,
-        timestamp: DateTime.now(),
-        selectedPetId: pet?.id, // sadece pet id gönderiliyor
-        userId: user.uid,
-      );
-
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('chatMessages')
-          .add(userMsg.toFirestore());
-
-      // Model seçimi ve prompt oluşturma
-      final selectedModel = _selectModelBasedOnContent(text, pet);
-      final prompt = _buildPrompt(text, pet, selectedModel);
-
-      // API çağrısı
-      final reply = await _queryModelWithRetry(
-        prompt: prompt,
-        model: selectedModel,
-        maxRetries: 2,
-      );
-
-      // Bot yanıtını kaydet
-      final botMsg = ChatMessage(
-        content: reply,
-        isUser: false,
-        timestamp: DateTime.now(),
-        selectedPetId: pet?.id, // sadece pet id gönderiliyor
-        userId: 'bot_${user.uid}',
-      );
-
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('chatMessages')
-          .add(botMsg.toFirestore());
-    } catch (e) {
-      debugPrint('Message sending error: $e');
-      rethrow;
-    }
-  }
-
-  Future<String> _queryModelWithRetry({
-    required String prompt,
-    required String model,
-    int maxRetries = 3,
-    int initialDelay = 2,
-  }) async {
+  Future<String> _queryAIWithRetry(String prompt) async {
     int attempt = 0;
-    int delay = initialDelay;
-    String lastError = '';
+    int delay = _initialRetryDelay;
+    Exception? lastError;
 
-    while (attempt < maxRetries) {
+    while (attempt < _maxRetries) {
       try {
         final response = await http
             .post(
-              Uri.parse('https://api-inference.huggingface.co/models/$model'),
-              headers: {
-                'Authorization': 'Bearer $_hfToken',
-                'Content-Type': 'application/json',
-              },
-              body: jsonEncode({'inputs': prompt}),
+              Uri.parse('https://openrouter.ai/api/v1/chat/completions'),
+              headers: _buildHeaders(),
+              body: jsonEncode(_buildRequestBody(prompt)),
             )
-            .timeout(const Duration(seconds: 30));
+            .timeout(_apiTimeout);
 
-        if (response.statusCode == 200) {
-          final responseData = jsonDecode(response.body);
-          if (responseData is List && responseData.isNotEmpty) {
-            final result = (responseData.first['generated_text'] as String)
-                .replaceFirst(prompt, '')
-                .trim();
-            if (result.isNotEmpty) return result;
-            throw Exception('Empty response from model');
-          }
-          throw Exception('Invalid response format');
-        } else if (response.statusCode == 503) {
-          final retryAfter =
-              int.tryParse(response.headers['retry-after'] ?? '$delay') ??
-              delay;
-          lastError = 'Model is loading, retrying in $retryAfter seconds';
-          await Future.delayed(Duration(seconds: retryAfter));
-          delay *= 2;
-          attempt++;
-        } else {
-          lastError = 'API Error: ${response.statusCode} - ${response.body}';
-          throw Exception(lastError);
-        }
+        return _handleApiResponse(response);
       } on TimeoutException {
-        lastError = 'Request timeout (attempt ${attempt + 1}/$maxRetries)';
-        if (++attempt >= maxRetries) throw Exception(lastError);
+        lastError = Exception('API request timed out');
+      } on http.ClientException catch (e) {
+        lastError = Exception('Network error: ${e.message}');
       } catch (e) {
-        lastError = e.toString();
-        rethrow;
+        lastError = Exception('Unexpected error: ${e.toString()}');
+      }
+      // Başarısızsa bekle ve tekrar dene
+      attempt++;
+      if (attempt < _maxRetries) {
+        await Future.delayed(Duration(seconds: delay));
+        delay *= 2;
       }
     }
-    throw Exception('Max retries reached. Last error: $lastError');
+    throw lastError ?? Exception('Failed after $_maxRetries attempts');
   }
 
-  String _selectModelBasedOnContent(String text, Pet? pet) {
-    final lowerText = text.toLowerCase();
+  /* ---------- Yardımcılar ---------- */
+  Map<String, String> _buildHeaders() => {
+    'Authorization': 'Bearer $_deepseekToken',
+    'Content-Type': 'application/json',
+    'HTTP-Referer': 'https://health_pet.example',
+    'X-Title': 'Veteriner Asistan',
+  };
 
-    if (lowerText.contains('beslenme') ||
-        lowerText.contains('diyet') ||
-        lowerText.contains('mama')) {
-      return _models['zephyr'] ?? _defaultModel;
-    }
+  Map<String, dynamic> _buildRequestBody(String prompt) => {
+    'model': "deepseek/deepseek-r1:free",
+    'messages': [
+      {'role': 'system', 'content': _buildSystemPrompt()},
+      {'role': 'user', 'content': prompt},
+    ],
+    'temperature': 0.7,
+    'max_tokens': 1000,
+  };
 
-    if (lowerText.contains('hastalık') ||
-        lowerText.contains('tedavi') ||
-        lowerText.contains('ilaç')) {
-      return _models['llama'] ?? _defaultModel;
-    }
+  String _buildSystemPrompt() => '''
+[ROL: VETERİNER YARDIMCISI]
+[YANIT DİLİ: TÜRKÇE]
+[LÜTFEN]
+1. Kullanıcıya sıcak ve bilgilendirici bir şekilde yanıt ver.
+2. Tıbbi tanı koyma, sadece öneri sun.
+3. Acil durum varsa: "ACİL VETERİNER DESTEĞİ GEREKLİ" uyarısı ver.
+4. Cevap yapısı:
+   - Özet
+   - Olası Nedenler
+   - Öneriler
+   - Veteriner Uyarısı (gerekiyorsa)
+5. Sonunda her zaman "Başka bir sorunuz var mı?" diye sor.
+''';
 
-    return _defaultModel;
-  }
-
-  String _buildPrompt(String text, Pet? pet, String model) {
+  String _buildPrompt(String text, Pet? pet) {
     final petInfo = pet != null
-        ? """
-### Pet Profile ###
-Name: ${pet.name}
-Type: ${pet.type}
-Breed: ${pet.breed}
-Age: ${pet.age} years
-Gender: ${pet.gender}
-"""
-        : "\nGeneral question: Not specific to any pet";
+        ? '''
+### Evcil Hayvan Bilgisi ###
+İsim: ${pet.name}
+Tür: ${pet.type}
+Cins: ${pet.breed}
+Yaş: ${pet.age}
+Cinsiyet: ${pet.gender}
+'''
+        : 'Genel soru. Evcil hayvan bilgisi verilmedi.';
 
-    return """
-[ROLE: VETERINARY ASSISTANT]
-[MODEL: ${model.split('/').last}]
-[INSTRUCTIONS]
-1. Respond in Turkish with a friendly tone
-2. Provide general information, no medical diagnoses
-3. For emergencies, state "ACİL VETERİNER DESTEĞİ GEREKLİ"
-4. Structure response as:
-   - Summary
-   - Possible Causes
-   - Recommendations
-   - Veterinary Warning
-
+    return '''
 $petInfo
 
-[USER QUESTION]
+[SORU]:
 ${text.trim()}
 
-[RESPONSE]:
-Merhaba! ${pet != null ? '${pet.name} için ' : ''}sorunuzu yanıtlıyorum:
-""";
+[YANIT]:
+''';
   }
 
-  Future<bool> checkModelStatus(String model) async {
-    try {
-      final response = await http
-          .head(
-            Uri.parse('https://api-inference.huggingface.co/models/$model'),
-            headers: {'Authorization': 'Bearer $_hfToken'},
-          )
-          .timeout(const Duration(seconds: 10));
-
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('Model status check failed: $e');
-      return false;
+  String _handleApiResponse(http.Response response) {
+    switch (response.statusCode) {
+      case 200:
+        final json = jsonDecode(response.body);
+        return (json['choices'][0]['message']['content'] as String).trim();
+      case 429:
+        throw Exception('API rate limit exceeded');
+      case 503:
+        throw Exception('Service unavailable');
+      default:
+        throw Exception('API error: ${response.statusCode}');
     }
   }
 }

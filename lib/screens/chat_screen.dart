@@ -1,39 +1,65 @@
-// lib/screens/chat_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:health_pet/models/chat_message.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // yalnızca pet’leri çekmek için
+import 'chat_welcome_screen.dart';
 import 'package:health_pet/models/pet_model.dart';
-import 'package:health_pet/providers/chat_provider.dart';
-import 'package:health_pet/providers/pet_profile_provider.dart';
-import 'package:health_pet/providers/pet_provider.dart';
+import 'package:health_pet/models/chat_message.dart';
 import 'package:health_pet/services/chat_service.dart';
-import 'package:intl/intl.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isSending = false;
-  bool _initialGreetingSent = false;
+  final ChatService _chatService = ChatService(
+    deepseekToken: dotenv.env['DEEPSEEK_TOKEN']!,
+  );
 
+  /* Bellekte tutulan geçici mesaj listesi */
+  final List<ChatMessage> _messages = [];
+
+  List<Pet> _pets = [];
+  Pet? _selectedPet;
+  bool _isGeneral = false;
+  bool _awaitingResponse = false;
+  bool _conversationEnded = false;
+
+  /* ------------------ Init ------------------ */
   @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadPets();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showInitialGreeting());
   }
 
+  Future<void> _loadPets() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('pets')
+        .get();
+
+    setState(() {
+      _pets = snapshot.docs.map((doc) => Pet.fromFirestore(doc, null)).toList();
+    });
+  }
+
+  /* ------------------ UI Helpers ------------------ */
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          0.0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -41,181 +67,120 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
-  Future<void> _sendInitialGreeting() async {
-    if (_initialGreetingSent) return;
-
-    final chatService = ref.read(chatServiceProvider);
-    final pet = ref.read(selectedPetProvider);
-
-    await chatService.sendUser(
-      pet != null
-          ? "Merhaba! ${pet.name} hakkında sorularınızı yanıtlamak için buradayım."
-          : "Merhaba! Veteriner asistanınız olarak genel sorularınızı yanıtlayabilirim.",
-      pet,
-    );
-
-    setState(() => _initialGreetingSent = true);
+  /* ------------------ Bot & User Messages ------------------ */
+  void _addBotMessage(String content) {
+    setState(() {
+      _messages.insert(
+        0,
+        ChatMessage(
+          content: content,
+          isUser: false,
+          timestamp: DateTime.now(),
+          selectedPetId: _selectedPet?.id,
+          userId: 'assistant',
+        ),
+      );
+    });
+    _scrollToBottom();
   }
 
   Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
-    if (text.isEmpty || _isSending) return;
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
 
-    final chatService = ref.read(chatServiceProvider);
-    final pet = ref.read(selectedPetProvider);
+    /* Kullanıcı mesajını belleğe ekle */
+    final userMsg = ChatMessage(
+      content: text,
+      isUser: true,
+      timestamp: DateTime.now(),
+      selectedPetId: _selectedPet?.id,
+      userId: FirebaseAuth.instance.currentUser!.uid,
+    );
+    setState(() {
+      _messages.insert(0, userMsg);
+      _controller.clear();
+      _awaitingResponse = true;
+    });
+    _scrollToBottom();
 
-    setState(() => _isSending = true);
-    _messageController.clear();
-
+    /* Bot cevabı al */
     try {
-      await chatService.sendUser(text, pet);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mesaj gönderilemedi: ${e.toString()}')),
+      final reply = await _chatService.getAIResponse(
+        text,
+        _isGeneral ? null : _selectedPet,
       );
-    } finally {
-      setState(() => _isSending = false);
-      _scrollToBottom();
+      setState(() {
+        _messages.insert(0, reply);
+        _awaitingResponse = false;
+      });
+      _askForMoreQuestions();
+    } catch (e) {
+      _addBotMessage("Üzgünüm, bir hata oluştu: ${e.toString()}");
+      setState(() => _awaitingResponse = false);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final chatService = ref.watch(chatServiceProvider);
-    final pet = ref.watch(selectedPetProvider);
-    final theme = Theme.of(context);
+  /* -------------- Akış Kontrolü -------------- */
+  void _showInitialGreeting() {
+    _addBotMessage(
+      "Merhaba, ben AIngel! Size hangi konuda yardımcı olabilirim?\n\n"
+      "Sorunuz dostlarınızla ilgiliyse ilgili dostunuzu seçin, "
+      "genel bir soruysa 'Diğer' seçeneğini seçin.",
+    );
+    Future.delayed(const Duration(milliseconds: 500), _showPetSelection);
+  }
 
-    // İlk açılış mesajını gönder
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_initialGreetingSent) {
-        _sendInitialGreeting();
-      }
-    });
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          pet != null
-              ? '${pet.name} - Veteriner Asistanı'
-              : 'Veteriner Asistanı',
-        ),
-        actions: [
-          if (pet != null)
-            IconButton(
-              icon: const Icon(Icons.pets),
-              onPressed: () {
-                // Evcil hayvan profiline gitme işlevselliği
-              },
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<List<ChatMessage>>(
-              stream: chatService.messages(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(child: Text('Hata: ${snapshot.error}'));
-                }
-
-                final messages = snapshot.data ?? [];
-
-                if (messages.isEmpty) {
-                  return const Center(child: Text('Sohbet başlatıldı'));
-                }
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    return _ChatBubble(
-                      message: message,
-                      isUser: message.isUser,
-                      pet: pet,
+  void _showPetSelection() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Lütfen bir seçenek belirleyin:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ..._pets.map(
+                (pet) => ListTile(
+                  leading: pet.profilePictureUrl != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(pet.profilePictureUrl!),
+                        )
+                      : CircleAvatar(child: Text(pet.name[0])),
+                  title: Text(pet.name),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedPet = pet;
+                      _isGeneral = false;
+                    });
+                    _addBotMessage(
+                      "${pet.name} hakkında sorularınızı yanıtlamak için buradayım. "
+                      "Nasıl yardımcı olabilirim?",
                     );
                   },
-                );
-              },
-            ),
-          ),
-          _MessageInputField(
-            controller: _messageController,
-            isSending: _isSending,
-            onSend: _sendMessage,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  final ChatMessage message;
-  final bool isUser;
-  final Pet? pet;
-
-  const _ChatBubble({required this.message, required this.isUser, this.pet});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final time = DateFormat('HH:mm').format(message.timestamp);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
-          ),
-          child: Column(
-            crossAxisAlignment: isUser
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
-            children: [
-              if (!isUser && pet != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '${pet!.name} için:',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              Container(
-                decoration: BoxDecoration(
-                  color: isUser
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.secondary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  message.content,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isUser
-                        ? theme.colorScheme.onPrimary
-                        : theme.textTheme.bodyMedium?.color,
-                  ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  time,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
-                  ),
-                ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text("Diğer (Genel Soru)"),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _selectedPet = null;
+                    _isGeneral = true;
+                  });
+                  _addBotMessage(
+                    "Veteriner asistanınız olarak genel sorularınızı yanıtlayabilirim. "
+                    "Nasıl yardımcı olabilirim?",
+                  );
+                },
               ),
             ],
           ),
@@ -223,58 +188,138 @@ class _ChatBubble extends StatelessWidget {
       ),
     );
   }
-}
 
-class _MessageInputField extends StatelessWidget {
-  final TextEditingController controller;
-  final bool isSending;
-  final VoidCallback onSend;
+  void _askForMoreQuestions() {
+    _addBotMessage(
+      "Başka bir sorunuz var mı? Eğer sorunuz yoksa 'Hayır' yazabilirsiniz.",
+    );
+  }
 
-  const _MessageInputField({
-    required this.controller,
-    required this.isSending,
-    required this.onSend,
-  });
+  void _endConversation() {
+    _addBotMessage(
+      "AIngel olarak size yardımcı olabildiysem ne mutlu bana! "
+      "Başka sorularınız olursa her zaman buradayım. İyi günler dilerim!",
+    );
+    setState(() => _conversationEnded = true);
 
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const ChatWelcomeScreen()),
+      );
+    });
+  }
+
+  void _handleUserResponse(String text) {
+    final lower = text.toLowerCase();
+    if (lower.contains("hayır") ||
+        lower.contains("yok") ||
+        lower.contains("teşekkür") ||
+        lower.contains("bitir")) {
+      _endConversation();
+    } else {
+      _sendMessage();
+    }
+  }
+
+  /* ------------------ Dispose ------------------ */
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /* ------------------ Build ------------------ */
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Mesajınızı yazın...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("AIngel Asistan"),
+        automaticallyImplyLeading: false,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              controller: _scrollController,
+              padding: const EdgeInsets.all(12),
+              itemCount: _messages.length,
+              itemBuilder: (_, i) {
+                final msg = _messages[i];
+                return Align(
+                  alignment: msg.isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: msg.isUser ? Colors.blue[100] : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: msg.isUser
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        if (_selectedPet != null && !msg.isUser)
+                          Text(
+                            _selectedPet!.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        Text(msg.content),
+                      ],
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                onSubmitted: (_) => onSend(),
-                maxLines: 3,
-                minLines: 1,
+                );
+              },
+            ),
+          ),
+          if (_conversationEnded)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Sohbet sonlandırılıyor...",
+                style: TextStyle(color: Colors.grey[600]),
               ),
             ),
-            const SizedBox(width: 8),
-            if (isSending)
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.send),
-                color: Theme.of(context).colorScheme.primary,
-                onPressed: onSend,
-              ),
-          ],
-        ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: _awaitingResponse
+                          ? "Yanıt bekleniyor..."
+                          : "Mesajınızı yazın...",
+                      border: const OutlineInputBorder(),
+                      enabled: !_awaitingResponse && !_conversationEnded,
+                    ),
+                    onSubmitted: (_) => _awaitingResponse
+                        ? _handleUserResponse(_controller.text)
+                        : _sendMessage(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _awaitingResponse
+                      ? () => _handleUserResponse(_controller.text)
+                      : _sendMessage,
+                  color: _awaitingResponse || _conversationEnded
+                      ? Colors.grey
+                      : Theme.of(context).primaryColor,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

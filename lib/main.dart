@@ -11,7 +11,6 @@ import 'package:health_pet/screens/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: 'assets/.env');
-
   await Firebase.initializeApp();
   //await NotificationHelper.initialize();
   //tz.initializeTimeZones();
