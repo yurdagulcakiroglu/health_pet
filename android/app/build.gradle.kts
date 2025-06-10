@@ -31,7 +31,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        resValue "string", "google_maps_key", project.properties["googleMapsApiKey"]
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+        resValue("string", "google_maps_key", (project.properties["googleMapsApiKey"] as? String) ?: "")
     }
 
     buildTypes {

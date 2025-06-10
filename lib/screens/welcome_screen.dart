@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/screens/signin_screen.dart';
 import 'package:health_pet/screens/signup_screen.dart';
 
-// Eğer WelcomeScreen'de yönetecek bir state varsa Provider'ınızı oluşturun
-// Örnek olarak bir counter state'i ekledim, siz ihtiyacınıza göre düzenleyebilirsiniz
+// Provider
 final welcomeScreenProvider = StateProvider<int>((ref) => 0);
 
 class WelcomeScreen extends ConsumerWidget {
@@ -13,9 +12,6 @@ class WelcomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Eğer state kullanacaksanız:
-    // final counter = ref.watch(welcomeScreenProvider);
-
     return Scaffold(
       body: SafeArea(
         child: Container(

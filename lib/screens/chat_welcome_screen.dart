@@ -35,7 +35,11 @@ class ChatWelcomeScreen extends ConsumerWidget {
               'Dijital Veteriner Asistanınız',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            const Text(
+              'Evcil dostunuzun sağlığıyla ilgili tüm sorularınızda yanınızda!',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
 
             // Maskot tam merkezde ve büyük şekilde
             Expanded(
@@ -43,7 +47,7 @@ class ChatWelcomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Center(
                   child: CircleAvatar(
-                    radius: 100,
+                    radius: 150,
                     backgroundImage: const AssetImage(
                       'assets/images/mascot.png',
                     ),
@@ -76,17 +80,9 @@ class ChatWelcomeScreen extends ConsumerWidget {
                     child: const Text('Hadi başlayalım'),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ChatScreen()),
-                      );
-                    },
-                    child: const Text(
-                      'Bana soru sor',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
+                  const Text(
+                    'Bana soru sor',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 32),
                 ],

@@ -415,15 +415,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       ? null
                       : () => signUpFunctions.signUpWithGoogle(context),
                 ),
-                const SizedBox(width: 20),
-                IconButton(
-                  icon: const FaIcon(
-                    FontAwesomeIcons.apple,
-                    size: 30.0,
-                    color: Colors.black54,
-                  ),
-                  onPressed: state.isLoading ? null : () {},
-                ),
               ],
             ),
           ],
@@ -465,6 +456,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //kvkk dialog
   Future<void> _showKvkkDialog(BuildContext context) async {
     final kvkkContent = await rootBundle.loadString(
       'assets/kvkk_text/kvkk.txt',
