@@ -78,7 +78,7 @@ final userPetsProvider = FutureProvider<List<Pet>>((ref) async {
   return snapshot.docs.map((doc) => Pet.fromFirestore(doc, doc.id)).toList();
 });
 
-//  NOTIFIER SINIFI
+// NOTIFIER SINIFI
 class PetProfileNotifier extends StateNotifier<PetProfileState> {
   final FirebaseFirestore firestore;
   final FirebaseStorage storage;
@@ -139,7 +139,13 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
       final destination =
           'pet_images/${FirebaseAuth.instance.currentUser?.uid}/${DateTime.now().millisecondsSinceEpoch}_$fileName';
       final ref = storage.ref().child(destination);
-      await ref.putFile(state.imageFile!);
+      final uploadTask = ref.putFile(state.imageFile!);
+      final snapshot = await uploadTask.whenComplete(() {});
+
+      if (snapshot.state != TaskState.success) {
+        throw Exception('Resim yüklenemedi');
+      }
+
       return await ref.getDownloadURL();
     } catch (e) {
       state = state.copyWith(error: 'Resim yüklenemedi: ${e.toString()}');
@@ -147,31 +153,35 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
     }
   }
 
-  Future<void> savePet({String? petId}) async {
+  Future<bool> savePet({String? petId}) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
       state = state.copyWith(error: 'Kullanıcı giriş yapmamış');
-      return;
+      return false;
     }
 
-    if (!_validateFields()) return;
+    if (!_validateFields()) return false;
 
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final imageUrl = await _uploadImage();
+      final now = DateTime.now();
       final updatedPet = state.pet.copyWith(
         profilePictureUrl: imageUrl ?? state.pet.profilePictureUrl,
         userId: userId,
+        createdAt: petId == null ? now : state.pet.createdAt,
       );
 
       if (petId == null) {
+        // Yeni pet oluşturma
         await firestore
             .collection('users')
             .doc(userId)
             .collection('pets')
             .add(updatedPet.toFirestore());
       } else {
+        // Pet güncelleme
         await firestore
             .collection('users')
             .doc(userId)
@@ -179,11 +189,13 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
             .doc(petId)
             .update(updatedPet.toFirestore());
       }
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'İşlem başarısız: ${e.toString()}',
       );
+      return false;
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -286,11 +298,20 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
       state = state.copyWith(pet: state.pet.copyWith(gender: gender));
 
   bool _validateFields() {
-    if (state.pet.name.isEmpty ||
-        state.pet.type.isEmpty ||
-        state.pet.breed.isEmpty ||
-        state.pet.birthDate.isEmpty) {
-      state = state.copyWith(error: 'Lütfen tüm zorunlu alanları doldurun');
+    if (state.pet.name.isEmpty) {
+      state = state.copyWith(error: 'Pet adı boş olamaz');
+      return false;
+    }
+    if (state.pet.type.isEmpty) {
+      state = state.copyWith(error: 'Pet türü boş olamaz');
+      return false;
+    }
+    if (state.pet.breed.isEmpty) {
+      state = state.copyWith(error: 'Pet cinsi boş olamaz');
+      return false;
+    }
+    if (state.pet.birthDate.isEmpty) {
+      state = state.copyWith(error: 'Doğum tarihi boş olamaz');
       return false;
     }
     return true;
@@ -299,16 +320,20 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
   void resetState() {
     state = PetProfileState(
       pet: Pet(
+        id: null,
         name: '',
         birthDate: '',
         type: '',
         breed: '',
+        gender: 'Dişi',
+        profilePictureUrl: null,
+        userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+        createdAt: null,
+        updatedAt: null,
         vaccineHistory: [],
         medicationHistory: [],
         weightHistory: [],
-        userId: '',
       ),
-      hasNewImage: false,
     );
   }
 }

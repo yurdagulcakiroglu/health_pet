@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:health_pet/providers/reminder_providers.dart';
 import 'package:health_pet/screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:pet_health/screens/create_pets_profile_screen.dart';
 import 'package:health_pet/screens/home_page.dart';
+import 'package:health_pet/services/notification_service.dart';
 //import 'package:pet_health/services/notification_service.dart';
 //import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: 'assets/.env');
+  await NotificationService.init();
   await Firebase.initializeApp();
   //await NotificationHelper.initialize();
   //tz.initializeTimeZones();
   runApp(
     ProviderScope(
       // ProviderScope ile sarmalandı
+      overrides: [
+        notificationServiceProvider.overrideWithValue(NotificationService()),
+        // Burada NotificationService sizin gerçek bildirim servisinizi temsil etmeli
+      ],
       child: const PetHealth(),
     ),
   );
