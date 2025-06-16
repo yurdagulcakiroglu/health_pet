@@ -8,8 +8,8 @@ import 'package:health_pet/providers/pet_profile_provider.dart';
 import 'package:health_pet/screens/create_pet_profile_screen.dart';
 import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 
-class PetHealthHomePage extends ConsumerWidget {
-  const PetHealthHomePage({super.key});
+class PetHealthHomePage2 extends ConsumerWidget {
+  const PetHealthHomePage2({super.key});
 
   String _calculateTimeLeft(Timestamp? reminderTimestamp) {
     if (reminderTimestamp == null) return 'Geçersiz zaman';

@@ -7,8 +7,8 @@ import 'package:health_pet/screens/create_pet_profile_screen.dart';
 import 'package:health_pet/screens/pet_detail_screen.dart';
 import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 
-class PetHealthHomePage extends ConsumerWidget {
-  const PetHealthHomePage({super.key});
+class PetHealthHomePage1 extends ConsumerWidget {
+  const PetHealthHomePage1({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

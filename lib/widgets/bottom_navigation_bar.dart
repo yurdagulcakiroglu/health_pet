@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/providers/navigation_provider.dart';
 import 'package:health_pet/screens/chat_welcome_screen.dart';
 //import 'package:health_pet/screens/home_screen.dart';
-import 'package:health_pet/screens/home_page.dart';
+//import 'package:health_pet/screens/home_page.dart';
 import 'package:health_pet/screens/location_screen.dart';
+import 'package:health_pet/screens/pet_health_home_page.dart';
 import 'package:health_pet/screens/reminder_screen.dart';
 //import 'package:health_pet/screens/profiles_screen.dart';
 //import 'package:health_pet/screens/reminder_screen.dart';
@@ -38,7 +39,7 @@ class CustomBottomNavigationBar extends ConsumerWidget {
           icon: Icon(Icons.local_hospital),
           label: 'Yerler',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Ayarlar'),
+        BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Ayarlar'),
       ],
       currentIndex: selectedIndex,
       onTap: (index) => _navigateToPage(context, index, navigationNotifier),

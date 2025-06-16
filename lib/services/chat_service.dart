@@ -112,7 +112,7 @@ class ChatService {
 [YANIT DİLİ: TÜRKÇE]
 [LÜTFEN]
 1. Kullanıcıya sıcak ve bilgilendirici bir şekilde yanıt ver.
-2. Tıbbi tanı koyma, sadece öneri sun.
+2. Tıbbi tanı koyma, sadece öneri sun ve tahmin et.
 3. Acil durum varsa: "ACİL VETERİNER DESTEĞİ GEREKLİ" uyarısı ver.
 4. Cevap yapısı:
    - Özet
@@ -120,7 +120,7 @@ class ChatService {
    - Öneriler
    - Veteriner Uyarısı (gerekiyorsa)
 5. Kullanıcıyı bilgilendirici ve destekleyici ol.
-6. Sorulara net ve anlaşılır cevaplar ver.
+6. Sorulara net ve anlaşılır cevaplar ver, çok uzatma kısa cevap vermeye çalış.
 ''';
 
   String _buildPrompt(String text, Pet? pet) {

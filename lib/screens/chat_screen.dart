@@ -7,6 +7,7 @@ import 'chat_welcome_screen.dart';
 import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/models/chat_message.dart';
 import 'package:health_pet/services/chat_service.dart';
+import 'package:health_pet/theme/app_colors.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -253,10 +254,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth:
+                          MediaQuery.of(context).size.width *
+                          0.8, // Ekran genişliğine göre ayarla
+                    ),
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: msg.isUser ? Colors.blue[100] : Colors.grey[300],
+                      color: msg.isUser
+                          ? AppColors.primaryColor
+                          : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -272,7 +280,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               fontSize: 12,
                             ),
                           ),
-                        Text(msg.content),
+                        Text(
+                          msg.content,
+                          softWrap: true, // Uzun metinleri alt satıra kaydır
+                          overflow: TextOverflow.visible, // Taşan metni kesme
+                          style: TextStyle(
+                            color: msg.isUser
+                                ? Colors.white
+                                : Colors.black, // Okunabilirlik için renk
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -314,7 +331,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       : _sendMessage,
                   color: _awaitingResponse || _conversationEnded
                       ? Colors.grey
-                      : Theme.of(context).primaryColor,
+                      : AppColors.secondaryColor,
                 ),
               ],
             ),

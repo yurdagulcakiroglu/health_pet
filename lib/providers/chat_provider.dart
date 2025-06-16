@@ -64,7 +64,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   void endConversation() {
     final goodbyeMessage = ChatMessage(
       content:
-          "Görüşmeyi sonlandırıyorum. Başka sorularınız olursa her zaman buradayım!",
+          "Görüşmeyi sonlandırıyorum. Başka sorularınız olursa her zaman buradayım. AIngel yanınızda",
       isUser: false,
       timestamp: DateTime.now(),
       userId: 'assistant',
