@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'forget_password_screen.dart';
+import 'package:health_pet/screens/signin_screen.dart';
+import 'package:health_pet/theme/app_colors.dart';
 
 class ForgetPage extends StatefulWidget {
   const ForgetPage({super.key});
@@ -12,25 +14,42 @@ class _ForgetPageState extends State<ForgetPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
 
-  void _sendResetCode() {
+  void _sendResetCode() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Burada e-mail ile sıfırlama kodu gönderme işlemini ekleyebilirsiniz.
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ForgetPasswordScreen(email: _emailController.text),
-        ),
-      );
+      final email = _emailController.text.trim();
+
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Şifre sıfırlama e-postası gönderildi')),
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SigninScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        String message = 'Bir hata oluştu.';
+        if (e.code == 'user-not-found') {
+          message = 'Bu e-posta ile kayıtlı bir kullanıcı bulunamadı.';
+        } else if (e.code == 'invalid-email') {
+          message = 'Geçerli bir e-posta adresi girin.';
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Şifre Sıfırlama"),
-        leading: BackButton(color: Colors.black),
+        leading: const BackButton(color: Colors.black),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -46,7 +65,7 @@ class _ForgetPageState extends State<ForgetPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF78C6F7),
+                  color: AppColors.secondaryColor, // secondaryColor
                 ),
               ),
               const SizedBox(height: 30),
@@ -71,7 +90,18 @@ class _ForgetPageState extends State<ForgetPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _sendResetCode,
-                  child: const Text('E-Mail Gönder!'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondaryColor, // ✅ primaryColor
+                    foregroundColor: Colors.black, // Yazı rengi
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'E-Mail Gönder!',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],

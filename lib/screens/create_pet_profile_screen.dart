@@ -43,7 +43,11 @@ class CreatePetProfileScreen extends ConsumerWidget {
                     backgroundColor: Colors.grey[200],
                     backgroundImage: state.imageFile != null
                         ? FileImage(state.imageFile!)
-                        : null,
+                        : (state.pet.profilePictureUrl != null
+                                  ? NetworkImage(state.pet.profilePictureUrl!)
+                                  : null)
+                              as ImageProvider?,
+
                     child: state.imageFile == null
                         ? const Icon(
                             Icons.add_a_photo,
@@ -82,6 +86,7 @@ class CreatePetProfileScreen extends ConsumerWidget {
   }
 }
 
+//===isim input===
 class _NameInput extends ConsumerWidget {
   final PetProfileNotifier notifier;
 
@@ -162,6 +167,7 @@ class _BirthDateInput extends ConsumerWidget {
   }
 }
 
+//===evcil hayvan türü input===
 class _TypeInput extends ConsumerWidget {
   final PetProfileNotifier notifier;
 
@@ -182,6 +188,7 @@ class _TypeInput extends ConsumerWidget {
   }
 }
 
+//=== ırk input===
 class _BreedInput extends ConsumerWidget {
   final PetProfileNotifier notifier;
 
@@ -202,6 +209,7 @@ class _BreedInput extends ConsumerWidget {
   }
 }
 
+//===cinsiyet dropdown===
 class _GenderDropdown extends ConsumerWidget {
   final PetProfileNotifier notifier;
 
@@ -305,6 +313,7 @@ class _InputField extends StatelessWidget {
   }
 }
 
+//=== kaydet butonu ===
 class _SaveButton extends ConsumerWidget {
   final String userId;
   final bool isLoading;
@@ -348,6 +357,7 @@ class _SaveButton extends ConsumerWidget {
     );
   }
 
+  //profil kaydetme
   Future<void> _saveProfile(
     BuildContext context,
     PetProfileNotifier notifier,

@@ -107,6 +107,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //====header
   Widget _buildHeader() {
     return Column(
       children: <Widget>[
@@ -130,6 +131,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  // === email girişi
   Widget _buildEmailInput(SignupFormNotifier notifier, SignupFormState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,6 +190,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //=== parola girişi
   Widget _buildPasswordInput(
     SignupFormNotifier notifier,
     SignupFormState state,
@@ -249,6 +252,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //=== parola tekrar girişi
   Widget _buildConfirmPasswordInput(
     SignupFormNotifier notifier,
     SignupFormState state,
@@ -310,6 +314,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //=== kişisel verilerin işlenmesi için onay kutusu
   Widget _buildAgreementCheckbox(
     SignupFormState state,
     SignupFormNotifier notifier,
@@ -344,6 +349,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //===kayıt butonu
   Widget _buildSignUpButton(
     SignupFormState state,
     SignupFormNotifier notifier,
@@ -389,6 +395,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //===sosyal medya ile giriş butonları
   Widget _buildSocialLoginButtons(
     SignupFormState state,
     SignUpFunctions signUpFunctions,
@@ -423,6 +430,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
+  //=== giriş yapma promtu
   Widget _buildSignInPrompt(SignupFormState state) {
     return FadeInUp(
       duration: const Duration(milliseconds: 1500),

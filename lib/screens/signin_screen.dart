@@ -61,35 +61,45 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            _buildHeader(),
-                            _buildLoginForm(
-                              authState,
-                              authController,
-                              context,
-                              _emailController,
-                              _passwordController,
-                              _emailFocusNode,
-                              _passwordFocusNode,
-                            ),
-                            _buildSocialLogin(ref, context),
-                            _buildSignUpPrompt(context),
-                          ],
+              return Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        _buildBottomImage(),
-                      ],
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    _buildHeader(),
+                                    _buildLoginForm(
+                                      authState,
+                                      authController,
+                                      context,
+                                      _emailController,
+                                      _passwordController,
+                                      _emailFocusNode,
+                                      _passwordFocusNode,
+                                    ),
+                                    _buildSocialLogin(ref, context),
+                                    _buildSignUpPrompt(context),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  _buildBottomImage(), // padding DIŞINDA
+                ],
               );
             },
           ),
@@ -98,6 +108,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //===Header
   Widget _buildHeader() {
     return Column(
       children: [
@@ -120,6 +131,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //===Giriş formu
   Widget _buildLoginForm(
     AuthState state,
     AuthController controller,
@@ -160,6 +172,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //=== email alanı
   Widget _buildEmailField(
     AuthState state,
     AuthController controller,
@@ -209,6 +222,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //===Parola alanı
   Widget _buildPasswordField(
     AuthState state,
     AuthController controller,
@@ -258,6 +272,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //===beni hatırla ve şifremi unuttum satırı
   Widget _buildRememberForgotRow(
     AuthState state,
     AuthController controller,
@@ -293,6 +308,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  //===Gİriş butonu
   Widget _buildLoginButton(
     AuthState state,
     AuthController controller,
@@ -322,6 +338,7 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
     );
   }
 
+  // ===Sosyal medya giriş butonu
   Widget _buildSocialLogin(WidgetRef ref, BuildContext context) {
     final authController = ref.read(authControllerProvider.notifier);
     final isLoading = ref.watch(authControllerProvider).isLoading;
@@ -379,10 +396,17 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
   }
 
   Widget _buildBottomImage() {
-    return SizedBox(
-      width: double.infinity,
-      height: 230,
-      child: Image.asset("assets/images/signin.png", fit: BoxFit.cover),
+    return FadeInUp(
+      duration: const Duration(milliseconds: 1200),
+      child: Container(
+        height: MediaQuery.of(context).size.height / 3.5,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/signin.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:health_pet/providers/reminder_providers.dart';
@@ -9,10 +10,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/services/notification_service.dart';
 //import 'package:pet_health/services/notification_service.dart';
 //import 'package:timezone/data/latest.dart' as tz;
+import 'firebase_options.dart';
 
 void main() async {
+  // Flutter motorunun hazır olduğundan emin olur
   WidgetsFlutterBinding.ensureInitialized();
+  // Ortam değişkenleri
   await dotenv.load(fileName: 'assets/.env');
+  // Bildirim servisi
   await NotificationService.init();
   await Firebase.initializeApp();
   //await NotificationHelper.initialize();
@@ -22,7 +27,6 @@ void main() async {
       // ProviderScope ile sarmalandı
       overrides: [
         notificationServiceProvider.overrideWithValue(NotificationService()),
-        // Burada NotificationService sizin gerçek bildirim servisinizi temsil etmeli
       ],
       child: const PetHealth(),
     ),
@@ -32,7 +36,7 @@ void main() async {
 class PetHealth extends StatelessWidget {
   const PetHealth({super.key});
 
-  // This widget is the root of your application.
+  //bu kısım uygulamamın kökü
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -56,7 +60,7 @@ class PetHealth extends StatelessWidget {
         '/home': (context) => const PetHealthHomePage(),
         // '/welcome_screen': (context) => const WelcomeScreen()
       },
-      home: const WelcomeScreen(), // WelcomeScreen(),PetHealthHomePage()
+      home: const WelcomeScreen(),
     );
   }
 }

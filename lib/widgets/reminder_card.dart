@@ -52,7 +52,7 @@ class ReminderCard extends StatelessWidget {
             ),
           ),
           title: Text(
-            '${pet['name']}\'in Klinik Randevusu',
+            '${pet['name']}\ için Klinik Randevusu',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 18,

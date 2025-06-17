@@ -173,8 +173,10 @@ class PetDetailsScreen extends ConsumerWidget {
           // Profil Fotoğrafı Güncelleme
           Center(
             child: ElevatedButton.icon(
-              onPressed: () =>
-                  ref.read(petProfileProvider.notifier).pickImage(),
+              onPressed: () => ref
+                  .read(petProfileProvider.notifier)
+                  .updateProfilePicture(petId),
+
               icon: const Icon(Icons.camera_alt),
               label: const Text('Profil Fotoğrafını Güncelle'),
             ),

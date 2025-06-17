@@ -153,6 +153,25 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
     }
   }
 
+  Future<void> updateProfilePicture(String petId) async {
+    try {
+      await pickImage(); // Galeriden resmi seç
+      if (state.imageFile != null && state.hasNewImage) {
+        final imageUrl = await _uploadImage(); // Firebase Storage'a yükle
+
+        if (imageUrl != null) {
+          await updateField(
+            'profilePictureUrl',
+            imageUrl,
+            petId,
+          ); // Firestore'da güncelle
+        }
+      }
+    } catch (e) {
+      state = state.copyWith(error: 'Profil fotoğrafı güncellenemedi: $e');
+    }
+  }
+
   Future<bool> savePet({String? petId}) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
