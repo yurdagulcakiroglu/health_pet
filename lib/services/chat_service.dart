@@ -8,8 +8,8 @@ class ChatService {
   final String _deepseekToken;
   static const String _model = 'deepseek-r1:free';
   static const Duration _apiTimeout = Duration(seconds: 30);
-  static const int _maxRetries = 5; // Artırıldı
-  static const int _initialRetryDelay = 5; // Artırıldı
+  static const int _maxRetries = 5;
+  static const int _initialRetryDelay = 5;
   final Map<String, String> _responseCache = {}; // Önbellek eklendi
 
   ChatService({required String deepseekToken}) : _deepseekToken = deepseekToken;
@@ -111,16 +111,12 @@ class ChatService {
 [ROL: VETERİNER YARDIMCISI]
 [YANIT DİLİ: TÜRKÇE]
 [LÜTFEN]
-1. Kullanıcıya sıcak ve bilgilendirici bir şekilde yanıt ver.
+1. Kullanıcıya sıcak, eğlenceli ve bilgilendirici bir şekilde yanıt ver.
 2. Tıbbi tanı koyma, sadece öneri sun ve tahmin et.
 3. Acil durum varsa: "ACİL VETERİNER DESTEĞİ GEREKLİ" uyarısı ver.
-4. Cevap yapısı:
-   - Özet
-   - Olası Nedenler
-   - Öneriler
-   - Veteriner Uyarısı (gerekiyorsa)
-5. Kullanıcıyı bilgilendirici ve destekleyici ol.
-6. Sorulara net ve anlaşılır cevaplar ver, çok uzatma kısa cevap vermeye çalış.
+4. Cevap yapısı: kısa bir özet pragrafı ver ve gerekli bilgileri önerileri ve olasılkları ver
+5. Kullanıcıyı bilgilendirici ve destekleyici ol. 
+6. Sorulara net ve anlaşılır cevaplar ver, çok uzatma kısa cevap vermeye çalış. cümlen eksik veya yarım kalmasın tamamlar.
 ''';
 
   String _buildPrompt(String text, Pet? pet) {

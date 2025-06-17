@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/providers/pet_profile_provider.dart';
-import 'package:health_pet/screens/home_page.dart';
 import 'package:health_pet/screens/pet_health_home_page.dart';
 import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 

@@ -29,17 +29,17 @@ class CustomBottomNavigationBar extends ConsumerWidget {
 
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Ekran'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'AnaSayfa'),
         BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Profiller'),
         BottomNavigationBarItem(
           icon: Icon(Icons.notifications),
           label: 'Hatırlatıcılar',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.local_hospital),
+          icon: Icon(Icons.location_on_rounded),
           label: 'Yerler',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Ayarlar'),
+        BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'AIngel'),
       ],
       currentIndex: selectedIndex,
       onTap: (index) => _navigateToPage(context, index, navigationNotifier),

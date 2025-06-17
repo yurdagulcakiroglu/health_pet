@@ -4,8 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:health_pet/screens/create_pet_profile_screen.dart';
 import 'package:health_pet/screens/chat_welcome_screen.dart';
 import 'package:health_pet/screens/pet_detail_screen.dart';
+import 'package:health_pet/widgets/aingel_card.dart';
 import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:health_pet/widgets/health_advice_card.dart';
+import 'package:health_pet/widgets/reminder_card.dart';
 
 class PetHealthHomePage extends StatefulWidget {
   const PetHealthHomePage({super.key});
@@ -78,7 +81,7 @@ class _PetHealthHomePageState extends State<PetHealthHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Evcil Hayvanlarım'),
+        title: const Text('Ana Sayfa'),
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
@@ -144,7 +147,7 @@ class _PetHealthHomePageState extends State<PetHealthHomePage> {
                             ? const Icon(
                                 Icons.pets,
                                 size: 40,
-                                color: Color(0xFFA1EF7A),
+                                color: Color.fromARGB(221, 112, 188, 77),
                               )
                             : null,
                       ),
@@ -179,7 +182,7 @@ class _PetHealthHomePageState extends State<PetHealthHomePage> {
                       final reminders = snapshot.data ?? [];
 
                       if (reminders.isEmpty) {
-                        return const SizedBox.shrink(); // Hiç hatırlatıcı yoksa gizle
+                        return const SizedBox.shrink();
                       }
 
                       return Column(
@@ -190,99 +193,27 @@ class _PetHealthHomePageState extends State<PetHealthHomePage> {
                               horizontal: 16.0,
                               vertical: 4,
                             ),
-                            child: Text(
-                              '${pet['name']} için Hatırlatıcılar',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
                           ),
                           ...reminders.map((reminder) {
                             final reminderTime =
                                 reminder['reminderDateTime'] as Timestamp?;
                             final timeLeft = _calculateTimeLeft(reminderTime);
-                            return Card(
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 6.0,
-                                horizontal: 16.0,
-                              ),
-                              elevation: 4,
-                              child: ListTile(
-                                leading: const Icon(
-                                  Icons.alarm,
-                                  color: Colors.teal,
-                                ),
-                                title: Text(
-                                  '${reminder['reminderType']}',
-                                  // Eğer petName de gerekiyorsa buraya eklenebilir ama zaten pet bazında listeleniyor
-                                ),
-                                subtitle: Text('Hatırlatıcı: $timeLeft'),
-                              ),
+
+                            return ReminderCard(
+                              reminder: reminder,
+                              pet: pet,
+                              timeLeft: timeLeft,
                             );
                           }).toList(),
                         ],
                       );
                     },
                   );
-                }),
+                }).toList(),
 
                 const SizedBox(height: 10),
-
-                // AIngel kartı
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ZoomIn(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ChatWelcomeScreen(),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        elevation: 6,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF8DECB4), Color(0xFF78C6F7)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                '🤖 AIngel - Yapay Zekâ Asistanınız!',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Evcil dostlarınızın sağlığını AIngel ile kolayca yönetin. Hemen tıklayın!',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                const AIngelCard(),
+                const HealthAdviceCard(),
               ],
             ),
           ),

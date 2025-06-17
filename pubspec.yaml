@@ -89,6 +89,7 @@ flutter:
     - assets/kvkk_text/
     - assets/.env
     - assets/animations/
+    - assets/tips/daily_tips.json
 
 dependency_overrides:
   flutter_google_places_sdk_platform_interface: 0.3.0  # Web ile uyumlu sürüm
