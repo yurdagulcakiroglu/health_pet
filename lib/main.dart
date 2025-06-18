@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:pet_health/screens/create_pets_profile_screen.dart';
 import 'package:health_pet/services/notification_service.dart';
+import 'package:intl/date_symbol_data_file.dart';
 //import 'package:pet_health/services/notification_service.dart';
 //import 'package:timezone/data/latest.dart' as tz;
 import 'firebase_options.dart';
@@ -22,6 +23,7 @@ void main() async {
   await Firebase.initializeApp();
   //await NotificationHelper.initialize();
   //tz.initializeTimeZones();
+
   runApp(
     ProviderScope(
       // ProviderScope ile sarmalandı

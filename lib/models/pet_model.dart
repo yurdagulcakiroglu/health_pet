@@ -1,16 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
+//=== aşı kayıtları için model
 class Vaccine {
   final String name;
   final DateTime date;
 
   Vaccine({required this.name, required this.date});
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {'name': name, 'date': Timestamp.fromDate(date)};
   }
 
-  factory Vaccine.fromMap(Map<String, dynamic> map) {
+  factory Vaccine.fromFiresote(Map<String, dynamic> map) {
     return Vaccine(
       name: map['name'] ?? '',
       date: (map['date'] as Timestamp).toDate(),
@@ -18,6 +20,7 @@ class Vaccine {
   }
 }
 
+//=== ilaç kayıtları için model
 class Medication {
   final String name;
   final DateTime date;
@@ -42,24 +45,65 @@ class Medication {
   }
 }
 
+//=== kilo kayıtları için model
 class WeightRecord {
   final DateTime date;
   final double weight;
 
   WeightRecord({required this.date, required this.weight});
 
-  Map<String, dynamic> toMap() {
+  factory WeightRecord.fromFirestore(dynamic data) {
+    try {
+      if (data == null) throw Exception('Null veri geldi');
+
+      // Tarih dönüşümü
+      final date = data['date'];
+      late DateTime parsedDate;
+
+      if (date is Timestamp) {
+        parsedDate = date.toDate();
+      } else if (date is String) {
+        parsedDate = DateTime.parse(date);
+      } else {
+        throw Exception('Geçersiz tarih formatı');
+      }
+
+      // Kilo dönüşümü
+      final weight = data['weight'];
+      late double parsedWeight;
+
+      if (weight is num) {
+        parsedWeight = weight.toDouble();
+      } else if (weight is String) {
+        parsedWeight = double.tryParse(weight.replaceAll(',', '.')) ?? 0.0;
+      } else {
+        throw Exception('Geçersiz kilo değeri');
+      }
+
+      return WeightRecord(date: parsedDate, weight: parsedWeight);
+    } catch (e) {
+      debugPrint('WeightRecord dönüşüm hatası: $e');
+      return WeightRecord(date: DateTime.now(), weight: 0.0);
+    }
+  }
+
+  Map<String, dynamic> toFirestore() {
     return {'date': Timestamp.fromDate(date), 'weight': weight};
   }
 
-  factory WeightRecord.fromMap(Map<String, dynamic> map) {
-    return WeightRecord(
-      date: (map['date'] as Timestamp).toDate(),
-      weight: (map['weight'] as num).toDouble(),
-    );
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WeightRecord &&
+          runtimeType == other.runtimeType &&
+          date == other.date &&
+          weight == other.weight;
+
+  @override
+  int get hashCode => date.hashCode ^ weight.hashCode;
 }
 
+//====pet modeli
 class Pet {
   final String? id;
   final String name;
@@ -104,13 +148,13 @@ class Pet {
       userId: data['userId'] as String? ?? '', // userId alanını ekledik
       createdAt: data['createdAt']?.toDate(),
       vaccineHistory: (data['vaccineHistory'] as List<dynamic>? ?? [])
-          .map((e) => Vaccine.fromMap(e as Map<String, dynamic>))
+          .map((e) => Vaccine.fromFiresote(e as Map<String, dynamic>))
           .toList(),
       medicationHistory: (data['medicationHistory'] as List<dynamic>? ?? [])
           .map((e) => Medication.fromMap(e as Map<String, dynamic>))
           .toList(),
       weightHistory: (data['weightHistory'] as List<dynamic>? ?? [])
-          .map((e) => WeightRecord.fromMap(e as Map<String, dynamic>))
+          .map((e) => WeightRecord.fromFirestore(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -124,9 +168,9 @@ class Pet {
       'gender': gender,
       'profilePictureUrl': profilePictureUrl,
       'userId': userId,
-      'vaccineHistory': vaccineHistory.map((v) => v.toMap()).toList(),
+      'vaccineHistory': vaccineHistory.map((v) => v.toFirestore()).toList(),
       'medicationHistory': medicationHistory.map((m) => m.toMap()).toList(),
-      'weightHistory': weightHistory.map((w) => w.toMap()).toList(),
+      'weightHistory': weightHistory.map((w) => w.toFirestore()).toList(),
       'updatedAt': FieldValue.serverTimestamp(),
       if (createdAt != null) 'createdAt': createdAt,
     };

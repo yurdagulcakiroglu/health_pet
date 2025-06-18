@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -77,6 +78,42 @@ final userPetsProvider = FutureProvider<List<Pet>>((ref) async {
 
   return snapshot.docs.map((doc) => Pet.fromFirestore(doc, doc.id)).toList();
 });
+
+//aĞIRLIK GEÇMİŞİ PROVİDER
+final petWeightHistoryProvider =
+    StreamProvider.family<List<WeightRecord>, String>((ref, petId) {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return Stream.value([]);
+
+      return FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('pets')
+          .doc(petId)
+          .snapshots()
+          .map((snapshot) {
+            if (!snapshot.exists) return [];
+
+            final data = snapshot.data()!;
+            final weightHistory = data['weightHistory'] as List<dynamic>? ?? [];
+
+            return weightHistory
+                .map((item) {
+                  try {
+                    if (item is! Map<String, dynamic>) {
+                      throw FormatException('Geçersiz veri formatı');
+                    }
+                    return WeightRecord.fromFirestore(item);
+                  } catch (e) {
+                    debugPrint('Hatalı kayıt: $e\nVeri: $item');
+                    return null;
+                  }
+                })
+                .whereType<WeightRecord>()
+                .toList()
+              ..sort((a, b) => b.date.compareTo(a.date));
+          });
+    });
 
 // NOTIFIER SINIFI
 class PetProfileNotifier extends StateNotifier<PetProfileState> {
@@ -169,6 +206,99 @@ class PetProfileNotifier extends StateNotifier<PetProfileState> {
       }
     } catch (e) {
       state = state.copyWith(error: 'Profil fotoğrafı güncellenemedi: $e');
+    }
+  }
+
+  void addWeightRecord(WeightRecord record) {
+    final updatedWeightHistory = List<WeightRecord>.from(
+      state.pet.weightHistory,
+    )..add(record);
+
+    state = state.copyWith(
+      pet: state.pet.copyWith(weightHistory: updatedWeightHistory),
+    );
+  }
+
+  Future<bool> addWeight(double weight, DateTime date) async {
+    final newRecord = WeightRecord(date: date, weight: weight);
+    addWeightRecord(newRecord);
+    try {
+      final petId = state.pet.id;
+      if (petId == null) throw Exception('Pet ID bulunamadı');
+
+      await addWeightToFirestore(petId, newRecord);
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: 'Kilo ekleme başarısız: $e');
+      return false;
+    }
+  }
+
+  Future<void> addWeightToFirestore(
+    String petId,
+    WeightRecord newRecord,
+  ) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Kullanıcı giriş yapmamış');
+    }
+
+    final petDoc = firestore
+        .collection('users')
+        .doc(userId)
+        .collection('pets')
+        .doc(petId);
+
+    // Firestore formatına dönüştür
+    final newWeightMap = newRecord.toFirestore();
+
+    // weightHistory array'ine yeni kayıt ekle
+    await petDoc.update({
+      'weightHistory': FieldValue.arrayUnion([newWeightMap]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> deleteWeightEntry(String petId, WeightRecord entry) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final doc = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('pets')
+          .doc(petId);
+
+      // Firestore'dan güncel veriyi al
+      final snapshot = await doc.get();
+      if (!snapshot.exists) return;
+
+      final pet = Pet.fromFirestore(snapshot, snapshot.id);
+
+      // İlgili weight entry'i filtrele (tarih ve kilo değerine göre)
+      final updatedWeightHistory = pet.weightHistory
+          .where(
+            (item) =>
+                item.weight != entry.weight ||
+                !item.date.isAtSameMomentAs(entry.date),
+          )
+          .toList();
+
+      // Güncellenmiş veriyi kaydet
+      await doc.update({
+        'weightHistory': updatedWeightHistory
+            .map((e) => e.toFirestore())
+            .toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // State'i güncelle
+      state = state.copyWith(
+        pet: state.pet.copyWith(weightHistory: updatedWeightHistory),
+      );
+    } catch (e) {
+      throw Exception('Kilo kaydı silinemedi: $e');
     }
   }
 

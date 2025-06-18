@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_pet/models/pet_model.dart';
 import 'package:health_pet/providers/pet_profile_provider.dart';
+import 'package:health_pet/screens/weight_history_screen.dart';
+import 'package:health_pet/theme/app_colors.dart';
 
 class PetDetailsScreen extends ConsumerWidget {
   final String petId;
@@ -98,25 +100,49 @@ class PetDetailsScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey[200], // Arkaplan rengi (opsiyonel)
-              backgroundImage:
-                  (pet.profilePictureUrl != null &&
-                      pet.profilePictureUrl!.isNotEmpty)
-                  ? NetworkImage(pet.profilePictureUrl!)
-                  : null,
-              child:
-                  (pet.profilePictureUrl == null ||
-                      pet.profilePictureUrl!.isEmpty)
-                  ? Icon(
-                      Icons.pets, // Flutter'ın pati ikonu
-                      size: 50,
-                      color: Colors.blue[800], // İstediğiniz renk
-                    )
-                  : null,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor:
+                      Colors.grey[200], // Arkaplan rengi (opsiyonel)
+                  backgroundImage:
+                      (pet.profilePictureUrl != null &&
+                          pet.profilePictureUrl!.isNotEmpty)
+                      ? NetworkImage(pet.profilePictureUrl!)
+                      : null,
+                  child:
+                      (pet.profilePictureUrl == null ||
+                          pet.profilePictureUrl!.isEmpty)
+                      ? Icon(
+                          Icons.pets, // Flutter'ın pati ikonu
+                          size: 50,
+                          color: AppColors.secondaryDark, // İstediğiniz renk
+                        )
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: () => ref
+                        .read(petProfileProvider.notifier)
+                        .updateProfilePicture(petId),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: const Color.fromARGB(152, 212, 255, 201),
+                      child: Icon(
+                        Icons.edit,
+                        size: 18,
+                        color: AppColors.secondaryDark,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+
           const SizedBox(height: 20),
 
           // İsim
@@ -170,15 +196,34 @@ class PetDetailsScreen extends ConsumerWidget {
             isGender: true,
           ),
 
-          // Profil Fotoğrafı Güncelleme
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () => ref
-                  .read(petProfileProvider.notifier)
-                  .updateProfilePicture(petId),
-
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Profil Fotoğrafını Güncelle'),
+          const SizedBox(height: 20),
+          // 📏 Kilo Kartı
+          Card(
+            color: Colors.blue.shade50,
+            elevation: 2,
+            child: ListTile(
+              leading: const Icon(Icons.monitor_weight_outlined),
+              title: const Text("Kilo Takibi"),
+              subtitle: Text(
+                pet.weightHistory.isNotEmpty
+                    ? (() {
+                        // Tarihe göre en güncel kiloyu bul
+                        final latest = pet.weightHistory.reduce(
+                          (a, b) => a.date.isAfter(b.date) ? a : b,
+                        );
+                        return "${latest.weight} kg (${latest.date.day}.${latest.date.month}.${latest.date.year})";
+                      })()
+                    : "Kayıtlı kilo bilgisi yok",
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WeightHistoryScreen(pet: pet),
+                  ),
+                );
+              },
             ),
           ),
         ],

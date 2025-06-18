@@ -1,6 +1,6 @@
-// importlar aynı
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart'; // Tarih formatlamak için
 import 'package:health_pet/widgets/add_reminder_dialog.dart';
 import 'package:health_pet/widgets/bottom_navigation_bar.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
@@ -58,6 +58,12 @@ class _ReminderScreenState extends ConsumerState<ReminderScreen> {
               final reminder = reminders[index];
               final petId = reminder.petId;
 
+              // Tarih nullable olduğu için kontrol ediyoruz
+              final reminderDate = reminder.reminderDateTime;
+              final formattedDate = reminderDate != null
+                  ? DateFormat('dd MMM yyyy, HH:mm').format(reminderDate)
+                  : 'Tarih belirtilmedi';
+
               return Dismissible(
                 key: Key(reminder.id),
                 direction: DismissDirection.endToStart,
@@ -110,8 +116,13 @@ class _ReminderScreenState extends ConsumerState<ReminderScreen> {
                   ),
                   child: ListTile(
                     title: Text(reminder.reminderText),
-                    subtitle: Text(
-                      'Hatırlatıcı Türü: ${reminder.reminderType}',
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Hatırlatıcı Türü: ${reminder.reminderType}'),
+                        const SizedBox(height: 4),
+                        Text('Tarih: $formattedDate'),
+                      ],
                     ),
                     trailing: LiteRollingSwitch(
                       value: reminder.isEnabled,

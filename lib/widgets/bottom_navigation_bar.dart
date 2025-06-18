@@ -6,6 +6,7 @@ import 'package:health_pet/screens/chat_welcome_screen.dart';
 //import 'package:health_pet/screens/home_page.dart';
 import 'package:health_pet/screens/location_screen.dart';
 import 'package:health_pet/screens/pet_health_home_page.dart';
+import 'package:health_pet/screens/profiles_screen.dart';
 import 'package:health_pet/screens/reminder_screen.dart';
 //import 'package:health_pet/screens/profiles_screen.dart';
 //import 'package:health_pet/screens/reminder_screen.dart';
@@ -65,7 +66,7 @@ class CustomBottomNavigationBar extends ConsumerWidget {
       case 0:
         return const PetHealthHomePage();
       case 1:
-        return const PetHealthHomePage(); //ProfilesScreen();
+        return const ProfilesScreen();
       case 2:
         return const ReminderScreen(); //PetHealthHomePage(); //ReminderScreen();
       case 3:
