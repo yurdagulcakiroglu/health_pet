@@ -19,6 +19,14 @@ class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Profil ekranı her açıldığında pet listesi yeniden yüklensin
+    ref.read(profileControllerProvider.notifier).loadPets();
+  }
+
   Future<void> _updatePassword() async {
     if (_formKey.currentState!.validate()) {
       User? user = FirebaseAuth.instance.currentUser;
@@ -151,24 +159,31 @@ class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
                 itemBuilder: (context, index) {
                   final pet = profileState.pets[index];
                   return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
                               PetDetailsScreen(petId: pet['id']),
                         ),
                       );
+                      if (result == true) {
+                        ref.read(profileControllerProvider.notifier).loadPets();
+                      }
                     },
                     child: Column(
                       children: [
                         CircleAvatar(
                           radius: 40,
                           backgroundColor: const Color(0xFFDCE9FC),
-                          backgroundImage: pet['profilePictureUrl'] != ''
+                          backgroundImage:
+                              (pet['profilePictureUrl'] != null &&
+                                  pet['profilePictureUrl'] != '')
                               ? NetworkImage(pet['profilePictureUrl'])
                               : null,
-                          child: pet['profilePictureUrl'] == ''
+                          child:
+                              (pet['profilePictureUrl'] == null ||
+                                  pet['profilePictureUrl'] == '')
                               ? const Icon(
                                   Icons.pets,
                                   size: 40,
@@ -177,7 +192,10 @@ class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
                               : null,
                         ),
                         const SizedBox(height: 10),
-                        Text(pet['name'], style: const TextStyle(fontSize: 16)),
+                        Text(
+                          pet['name'] ?? 'İsimsiz',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ],
                     ),
                   );

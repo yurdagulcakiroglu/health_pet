@@ -80,7 +80,7 @@ class PetDetailsScreen extends ConsumerWidget {
             onPressed: () async {
               final userId = FirebaseAuth.instance.currentUser!.uid;
               await ref.read(petProfileProvider.notifier).deletePet(petId);
-              if (context.mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context, true);
             },
           ),
         ],
@@ -115,7 +115,7 @@ class PetDetailsScreen extends ConsumerWidget {
                       (pet.profilePictureUrl == null ||
                           pet.profilePictureUrl!.isEmpty)
                       ? Icon(
-                          Icons.pets, // Flutter'ın pati ikonu
+                          Icons.pets,
                           size: 50,
                           color: AppColors.secondaryDark, // İstediğiniz renk
                         )

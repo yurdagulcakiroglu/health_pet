@@ -54,4 +54,30 @@ class ProfileController extends StateNotifier<ProfileState> {
       state = state.copyWith(pets: pets);
     }
   }
+
+  Future<void> deletePet(String petId) async {
+    try {
+      // Firebase'den sil
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('pets')
+          .doc(petId)
+          .delete();
+
+      // State içindeki pets listesini güncelle
+      final updatedPets = state.pets
+          .where((pet) => pet['id'] != petId)
+          .toList();
+
+      // Yeni state ile güncelle
+      state = state.copyWith(pets: updatedPets);
+    } catch (e) {
+      // Hata yönetimi (opsiyonel)
+      print('Pet silme hatası: $e');
+    }
+  }
 }
