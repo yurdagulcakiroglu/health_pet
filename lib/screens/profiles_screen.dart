@@ -27,6 +27,7 @@ class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
     ref.read(profileControllerProvider.notifier).loadPets();
   }
 
+  //PASSWORD GÜNCELLEME
   Future<void> _updatePassword() async {
     if (_formKey.currentState!.validate()) {
       User? user = FirebaseAuth.instance.currentUser;
