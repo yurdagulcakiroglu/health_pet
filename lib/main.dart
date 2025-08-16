@@ -12,10 +12,14 @@ import 'package:intl/date_symbol_data_file.dart';
 //import 'package:pet_health/services/notification_service.dart';
 //import 'package:timezone/data/latest.dart' as tz;
 import 'firebase_options.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() async {
   // Flutter motorunun hazır olduğundan emin olur
   WidgetsFlutterBinding.ensureInitialized();
+
+  // reklam servisi
+  MobileAds.instance.initialize();
   // Ortam değişkenleri
   await dotenv.load(fileName: 'assets/.env');
   // Bildirim servisi
